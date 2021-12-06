@@ -9,33 +9,45 @@ class piece
 public:
     class pawn
     {
-        int value;
-        bool color;
+        public:
+            int value;
+            bool color;
+            square *location;
     };
     class rook
     {
-        int value;
-        bool color;
+        public:
+            int value;
+            bool color;
+            square *location;
     };
     class knight
     {
-        int value;
-        bool color;
+        public:
+            int value;
+            bool color;
+            square *location;
     };
     class bishop
     {
-        int value;
-        bool color;
+        public:
+            int value;
+            bool color;
+            square *location;
     };
     class queen
     {
-        int value;
-        bool color;
+        public:
+            int value;
+            bool color;
+            square *location;
     };
     class king
     {
-        int value;
-        bool color;
+        public:
+            int value;
+            bool color;
+            square *location;
     };
     bool is_move_legal(piece type, square from, square to);
 };

@@ -1,4 +1,5 @@
 #include "board.h"
+#include "pieces.h"
 
 board::board()
 {
@@ -6,6 +7,8 @@ board::board()
     std::string name;
     char letter = '@';
     int index = 0;
+    int pieceCount = 0;
+    
     for (auto idx = 0; idx < 8; idx++)
     {
         letter += 1;
@@ -17,4 +20,22 @@ board::board()
             index++;
         }
     }
+    piece::pawn *whitepawn1 = new piece::pawn;
+    whitepawn1->color = 0;
+    piece::pawn *whitepawn2 = new piece::pawn;
+    piece::pawn *whitepawn3 = new piece::pawn;
+    piece::pawn *whitepawn4 = new piece::pawn;
+    piece::pawn *whitepawn5 = new piece::pawn;
+    piece::pawn *whitepawn6 = new piece::pawn;
+    piece::pawn *whitepawn7 = new piece::pawn;
+    piece::pawn *whitepawn8 = new piece::pawn;
+
+    piece::pawn *blackpawn1 = new piece::pawn;
+    piece::pawn *blackpawn2 = new piece::pawn;
+    piece::pawn *blackpawn3 = new piece::pawn;
+    piece::pawn *blackpawn4 = new piece::pawn;
+    piece::pawn *blackpawn5 = new piece::pawn;
+    piece::pawn *blackpawn6 = new piece::pawn;
+    piece::pawn *blackpawn7 = new piece::pawn;
+    piece::pawn *blackpawn8 = new piece::pawn;
 }
