@@ -10,6 +10,7 @@ public:
     class pawn
     {
         public:
+            std::string name = "Pawn";
             int value;
             bool color;
             square *location;
@@ -17,6 +18,7 @@ public:
     class rook
     {
         public:
+            std::string name = "Rook";
             int value;
             bool color;
             square *location;
@@ -24,6 +26,7 @@ public:
     class knight
     {
         public:
+            std::string name = "Knight";
             int value;
             bool color;
             square *location;
@@ -31,6 +34,7 @@ public:
     class bishop
     {
         public:
+            std::string name = "Bishop";
             int value;
             bool color;
             square *location;
@@ -38,6 +42,7 @@ public:
     class queen
     {
         public:
+            std::string name = "Queen";
             int value;
             bool color;
             square *location;
@@ -45,6 +50,7 @@ public:
     class king
     {
         public:
+            std::string name = "King";
             int value;
             bool color;
             square *location;
