@@ -289,3 +289,20 @@ board::board()
         }
     }
 }
+
+board::~board()
+{
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        if (squares[idx].occupant)
+        {
+            delete squares[idx].occupant;
+        }
+    }
+    delete[] squares;
+}
+
+void update_attacked_squares()
+{
+    
+}

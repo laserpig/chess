@@ -11,5 +11,4 @@ class piece
         bool color;
         square *location;
         char type;
-        bool is_move_legal(piece candidate, square to);
 };
