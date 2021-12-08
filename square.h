@@ -1,5 +1,6 @@
 #pragma once
 
+class piece;
 #include <string>
 #include "pieces.h"
 
