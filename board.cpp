@@ -5,6 +5,8 @@
 board::board()
 {
     squares = new square[64];
+    white_attacked_squares = NULL;
+    black_attacked_squares = NULL;
     std::string name;
     char letter = '@';
     int index = 0;
@@ -302,7 +304,48 @@ board::~board()
     delete[] squares;
 }
 
-void update_attacked_squares()
+void board::update_attacked_squares()
 {
-    
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        if (squares[idx].occupant)
+        {
+            if (squares[idx].occupant->color == '0')
+            {
+                switch(squares[idx].occupant->type)
+                {
+                    case 'R':
+                        break;
+                    case 'N':
+                        break;
+                    case 'B':
+                        break;
+                    case 'P':
+                        break;
+                    case 'Q':
+                        break;
+                    case 'K':
+                        break;
+                }
+            }
+            else
+            {
+                switch(squares[idx].occupant->type)
+                {
+                    case 'R':
+                        break;
+                    case 'N':
+                        break;
+                    case 'B':
+                        break;
+                    case 'P':
+                        break;
+                    case 'Q':
+                        break;
+                    case 'K':
+                        break;
+                }
+            }
+        }
+    }
 }

@@ -14,4 +14,5 @@ class board
         ~board();
         bool is_move_legal(piece candidate, square to);
         void update_attacked_squares();
+        void orthogonal(square origin);
 };
