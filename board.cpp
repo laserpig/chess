@@ -5,8 +5,6 @@
 board::board()
 {
     squares = new square[64];
-    white_attacked_squares = NULL;
-    black_attacked_squares = NULL;
     std::string name;
     char letter = '@';
     int index = 0;
@@ -125,7 +123,7 @@ board::board()
             name = letter + std::to_string(jdx + 1);
             squares[index].name = name;
             squares[index].occupant = NULL;
-
+        
             if (name == "A1")
             {
                 squares[index].occupant = white_rook1;
@@ -304,6 +302,17 @@ board::~board()
     delete[] squares;
 }
 
+void board::move(piece *aPiece, square *to)
+{
+    if (to->occupant)
+    {
+        delete to->occupant;
+    } 
+    aPiece->location->occupant = NULL;
+    to->occupant = aPiece;
+    aPiece->location = to;
+}
+
 void board::update_attacked_squares()
 {
     for (auto idx = 0; idx < 64; idx++)
@@ -348,4 +357,188 @@ void board::update_attacked_squares()
             }
         }
     }
+}
+
+void board::orthog_up(std::vector<square> &data, int index, int color)
+{
+    if (index % 8 == 7) return;
+    index++;
+    while (index < 64 && index % 8 != 7)
+    {   
+        if (squares[index].occupant != NULL) break;
+        data.push_back(squares[index]);
+        index++;
+    }
+    if (index > 63) return;
+    if (squares[index].occupant) 
+    {
+        if (squares[index].occupant->color == color) return;
+        else 
+        {
+            data.push_back(squares[index]);
+            return;
+        }
+    }
+    else data.push_back(squares[index]);
+}
+
+void board::orthog_down(std::vector<square> &data, int index, int color)
+{
+    if (index % 8 == 0) return;
+    index--;
+    while (index > -1 && index % 8 != 0)
+    {
+        if (squares[index].occupant != NULL) break;
+        data.push_back(squares[index]);
+        index--;
+    }
+    if (index < 0) return;
+    if (squares[index].occupant) 
+    {
+        if (squares[index].occupant->color == color) return;
+        else 
+        {
+            data.push_back(squares[index]);
+            return;
+        }
+    }
+    else data.push_back(squares[index]);
+}
+
+void board::orthog_left(std::vector<square> &data, int index, int color)
+{
+    if (index < 8) return;
+    index -= 8;
+    while (index > 7)
+    {
+        if (squares[index].occupant != NULL) break;
+        data.push_back(squares[index]);
+        index -= 8;
+    }
+    if (index < 0) return;
+    if (squares[index].occupant) 
+    {
+        if (squares[index].occupant->color == color) return;
+        else 
+        {
+            data.push_back(squares[index]);
+            return;
+        }
+    }
+    else data.push_back(squares[index]);
+}
+
+void board::orthog_right(std::vector<square> &data, int index, int color)
+{
+    if (index > 55) return;
+    index += 8;
+    while (index < 56)
+    {
+        if (squares[index].occupant != NULL) break;
+        data.push_back(squares[index]);
+        index += 8;
+    }
+    if (index > 63) return;
+    if (squares[index].occupant) 
+    {
+        if (squares[index].occupant->color == color) return;
+        else 
+        {
+            data.push_back(squares[index]);
+            return;
+        }
+    }
+    else data.push_back(squares[index]);
+}
+
+void board::diag_up_left(std::vector<square> &data, int index, int color)
+{
+    if (index < 8 || index % 8 == 7) return;
+    index -= 7;
+    while (index > 7 && index % 8 != 7)
+    {
+        if (squares[index].occupant != NULL) break;
+        data.push_back(squares[index]);
+        index -= 7;
+    }
+    if (index < 0) return;
+    if (squares[index].occupant) 
+    {
+        if (squares[index].occupant->color == color) return;
+        else 
+        {
+            data.push_back(squares[index]);
+            return;
+        }
+    }
+    else data.push_back(squares[index]);
+}
+
+void board::diag_up_right(std::vector<square> &data, int index, int color)
+{
+    if (index > 55 || index % 8 == 7) return;
+    index += 9;
+    while (index < 56 && index % 8 != 7)
+    {
+        if (squares[index].occupant != NULL) break;
+        data.push_back(squares[index]);
+        index += 9;
+    }
+    if (index > 63) return;
+    if (squares[index].occupant) 
+    {
+        if (squares[index].occupant->color == color) return;
+        else 
+        {
+            data.push_back(squares[index]);
+            return;
+        }
+    }
+    else data.push_back(squares[index]);
+}
+
+void board::diag_down_left(std::vector<square> &data, int index, int color)
+{
+    if (index < 8 || index % 8 == 0) return;
+    index -= 9;
+    while (index > 7 && index % 8 != 0)
+    {
+        if (squares[index].occupant != NULL) break;
+        data.push_back(squares[index]);
+        index -= 9;
+    }
+    if (index < 0) return;
+    if (squares[index].occupant) 
+    {
+        if (squares[index].occupant->color == color) return;
+        else 
+        {
+            data.push_back(squares[index]);
+            return;
+        }
+    }
+    else data.push_back(squares[index]);
+}
+
+void board::diag_down_right(std::vector<square> &data, int index, int color)
+{
+    if (index > 55 || index % 8 == 0) return;
+    index += 7;
+    while (index < 56 && index % 8 != 0)
+    {
+        if (squares[index].occupant != NULL) break;
+        data.push_back(squares[index]);
+        index += 7;
+    }
+    if (index < 0) return;
+    if (squares[index].occupant) 
+    {
+        if (squares[index].occupant->color == color) return;
+        else 
+        {
+            data.push_back(squares[index]);
+            return;
+        }
+    }
+    else data.push_back(squares[index]);
 }

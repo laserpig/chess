@@ -4,8 +4,17 @@
 int main()
 {   
     board game;
-    std::cout << "Square: " << game.squares[39].name << std::endl;
-    game.orthogonal(game.squares[39]);
-
+    game.orthog_up(game.white_attacked_squares, 27, 1);
+    game.orthog_down(game.white_attacked_squares, 27, 1);
+    game.orthog_left(game.white_attacked_squares, 27, 1);
+    game.orthog_right(game.white_attacked_squares, 27, 1);
+    game.diag_down_left(game.white_attacked_squares, 27, 1);
+    game.diag_down_right(game.white_attacked_squares, 27, 1);
+    game.diag_up_left(game.white_attacked_squares, 27, 1);
+    game.diag_up_right(game.white_attacked_squares, 27, 1);
+    for (auto idx = 0; idx < game.white_attacked_squares.size(); idx++)
+    {
+        std::cout << game.white_attacked_squares[idx].name << std::endl;
+    }
     return 0;
 }

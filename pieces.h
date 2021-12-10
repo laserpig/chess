@@ -8,7 +8,7 @@ class piece
 {
     public:
         int value;
-        bool color;
+        int color;
         square *location;
         char type;
 };
