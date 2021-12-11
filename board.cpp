@@ -123,7 +123,7 @@ board::board()
             name = letter + std::to_string(jdx + 1);
             squares[index].name = name;
             squares[index].occupant = NULL;
-        
+
             if (name == "A1")
             {
                 squares[index].occupant = white_rook1;
@@ -311,6 +311,7 @@ void board::move(piece *aPiece, square *to)
     aPiece->location->occupant = NULL;
     to->occupant = aPiece;
     aPiece->location = to;
+    aPiece->move_count++;
 }
 
 void board::update_attacked_squares()
@@ -541,4 +542,106 @@ void board::diag_down_right(std::vector<square> &data, int index, int color)
         }
     }
     else data.push_back(squares[index]);
+}
+
+void board::knight_jump(std::vector<square> &data, int index, int color)
+{
+    if (index > 7 && index % 8 != 6 && index % 8 != 7)
+    {
+        if (squares[index - 6].occupant == NULL) data.push_back(squares[index - 6]);
+        else if (squares[index - 6].occupant->color != color) data.push_back(squares[index - 6]);
+    }
+    if (index < 56 && index % 8 != 6 && index % 8 != 7)
+    {
+        if (squares[index + 10].occupant == NULL) data.push_back(squares[index + 10]);
+        else if (squares[index + 10].occupant->color != color) data.push_back(squares[index + 10]);
+    }
+    if (index % 8 != 7 && index > 15)
+    {
+        if (squares[index - 15].occupant == NULL)  data.push_back(squares[index - 15]);
+        else if (squares[index- 15].occupant->color != color)  data.push_back(squares[index - 15]);
+    }
+    if (index % 8 != 7 && index < 48)
+    {
+        if (squares[index + 17].occupant == NULL) data.push_back(squares[index +17]);
+        else if (squares[index + 17].occupant->color != color) data.push_back(squares[index +17]);
+    }
+    if (index % 8 != 0 && index > 15)
+    {
+        if (squares[index- 17].occupant == NULL) data.push_back(squares[index - 17]);
+        else if (squares[index - 17].occupant->color != color) data.push_back(squares[index - 17]);
+    }
+    if (index % 8 != 0 && index < 48)
+    {
+        if (squares[index + 15].occupant == NULL) data.push_back(squares[index + 15]);
+        else if (squares[index + 15].occupant->color != color) data.push_back(squares[index + 15]);
+    }
+    if (index % 8 != 0 && index % 8 != 1 && index > 7)
+    {
+        if (squares[index - 10].occupant == NULL) data.push_back(squares[index - 10]);
+        else if (squares[index - 10].occupant->color != color) data.push_back(squares[index - 10]);
+    }
+    if (index % 8 != 0 && index % 8 != 1 && index < 56)
+    {
+        if (squares[index + 6].occupant == NULL) data.push_back(squares[index + 6]);
+        else if (squares[index + 6].occupant->color != color) data.push_back(squares[index + 6]);   
+    }
+}
+
+void board::king_attack(std::vector<square> &data, int index, int color)
+{
+    if (index % 8 != 7)
+    {
+        if (squares[index + 1].occupant == NULL) data.push_back(squares[index + 1]);
+        else if (squares[index + 1].occupant->color != color) data.push_back(squares[index + 1]);
+    }
+    if (index > 7)
+    {
+        if (squares[index - 8].occupant == NULL) data.push_back(squares[index - 8]);
+        else if (squares[index - 8].occupant->color != color) data.push_back(squares[index - 8]);
+    }
+    if (index % 8 != 0)
+    {
+        if (squares[index - 1].occupant == NULL) data.push_back(squares[index - 1]);
+        else if (squares[index - 1].occupant->color != color) data.push_back(squares[index - 1]);
+    }
+    if (index < 56)
+    {
+        if (squares[index + 8].occupant == NULL) data.push_back(squares[index + 8]);
+        else if (squares[index + 8].occupant->color != color) data.push_back(squares[index + 8]);
+    }
+    if (index > 7 && index % 8 != 7)
+    {
+        if (squares[index - 7].occupant == NULL) data.push_back(squares[index - 7]);
+        else if (squares[index - 7].occupant->color != color) data.push_back(squares[index - 7]);
+    }
+    if (index < 56 && index % 8 != 7)
+    {
+        if (squares[index + 9].occupant == NULL) data.push_back(squares[index + 9]);
+        else if (squares[index + 9].occupant->color != color) data.push_back(squares[index + 9]);
+    }
+    if (index > 7 && index % 8 != 0)
+    {
+        if (squares[index - 9].occupant == NULL) data.push_back(squares[index - 9]);
+        else if (squares[index - 9].occupant->color != color) data.push_back(squares[index - 9]);
+    }
+    if (index < 56 && index % 8 != 0)
+    {
+        if (squares[index + 7].occupant == NULL) data.push_back(squares[index + 7]);
+        else if (squares[index + 7].occupant->color != color) data.push_back(squares[index + 7]);
+    }
+}
+
+void board::pawn_attack(std::vector<square> &data, int index, int color)
+{
+     if (index > 7 && index % 8 != 7)
+    {
+        if (squares[index - 7].occupant == NULL) data.push_back(squares[index - 7]);
+        else if (squares[index - 7].occupant->color != color) data.push_back(squares[index - 7]);
+    }
+     if (index < 56 && index % 8 != 7)
+    {
+        if (squares[index + 9].occupant == NULL) data.push_back(squares[index + 9]);
+        else if (squares[index + 9].occupant->color != color) data.push_back(squares[index + 9]);
+    }
 }

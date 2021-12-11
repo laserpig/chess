@@ -24,4 +24,7 @@ class board
         void orthog_down(std::vector<square> &data, int index, int color);
         void orthog_left(std::vector<square> &data, int index, int color);
         void orthog_right(std::vector<square> &data, int index, int color);
+        void knight_jump(std::vector<square> &data, int index, int color);
+        void king_attack(std::vector<square> &data, int index, int color);
+        void pawn_attack(std::vector<square> &data, int index, int color);
 };

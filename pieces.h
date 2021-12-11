@@ -11,4 +11,5 @@ class piece
         int color;
         square *location;
         char type;
+        int move_count = 0;
 };
