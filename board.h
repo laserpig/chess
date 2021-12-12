@@ -8,23 +8,27 @@
 class board
 {
     public:
+        board();
+        ~board();
         square *squares;
         std::vector<square> white_attacked_squares;
         std::vector<square> black_attacked_squares;
-        board();
-        ~board();
+        bool white_king_in_check;
+        bool black_king_in_check;
+        square * copy_board(square *A1);
         void move(piece *aPiece, square *to);
         bool is_move_legal(piece candidate, square to);
-        void update_attacked_squares();
-        void diag_up_left(std::vector<square> &data, int index, int color);
-        void diag_up_right(std::vector<square> &data, int index, int color);
-        void diag_down_left(std::vector<square> &data, int index, int color);
-        void diag_down_right(std::vector<square> &data, int index, int color);
-        void orthog_up(std::vector<square> &data, int index, int color);
-        void orthog_down(std::vector<square> &data, int index, int color);
-        void orthog_left(std::vector<square> &data, int index, int color);
-        void orthog_right(std::vector<square> &data, int index, int color);
-        void knight_jump(std::vector<square> &data, int index, int color);
-        void king_attack(std::vector<square> &data, int index, int color);
-        void pawn_attack(std::vector<square> &data, int index, int color);
+        bool check_for_check(int piece_index, int destination);
+        void update_attacked_squares(std::vector<square> &white, std::vector<square> &black, square *aBoard);
+        void diag_up_left(std::vector<square> &data, int index, int color, square *aBoard);
+        void diag_up_right(std::vector<square> &data, int index, int color, square *aBoard);
+        void diag_down_left(std::vector<square> &data, int index, int color, square *aBoard);
+        void diag_down_right(std::vector<square> &data, int index, int color, square *aBoard);
+        void orthog_up(std::vector<square> &data, int index, int color, square *aBoard);
+        void orthog_down(std::vector<square> &data, int index, int color, square *aBoard);
+        void orthog_left(std::vector<square> &data, int index, int color, square *aBoard);
+        void orthog_right(std::vector<square> &data, int index, int color, square *aBoard);
+        void knight_jump(std::vector<square> &data, int index, int color, square *aBoard);
+        void king_attack(std::vector<square> &data, int index, int color, square *aBoard);
+        void pawn_attack(std::vector<square> &data, int index, int color, square *aBoard);
 };

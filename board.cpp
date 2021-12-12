@@ -302,6 +302,28 @@ board::~board()
     delete[] squares;
 }
 
+square * board::copy_board(square *A1)
+{
+    square *copy = new square[64];
+    piece *new_piece = NULL;
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        copy[idx].name = squares[idx].name;
+        if (A1[idx].occupant)
+        {
+            new_piece = new piece;
+            new_piece->color = A1[idx].occupant->color;
+            new_piece->value = A1[idx].occupant->value;
+            new_piece->type = A1[idx].occupant->type;
+            new_piece->move_count = A1[idx].occupant->move_count;
+            new_piece->location = &copy[idx];
+            copy[idx].occupant = new_piece;
+            new_piece = NULL;
+        }
+    }
+    return copy;
+}
+
 void board::move(piece *aPiece, square *to)
 {
     if (to->occupant)
@@ -314,45 +336,86 @@ void board::move(piece *aPiece, square *to)
     aPiece->move_count++;
 }
 
-void board::update_attacked_squares()
+void board::update_attacked_squares(std::vector<square> &white, std::vector<square> &black, square *aBoard)
 {
+    white.clear();
+    black.clear();
+    
     for (auto idx = 0; idx < 64; idx++)
     {
-        if (squares[idx].occupant)
+        if (aBoard[idx].occupant)
         {
-            if (squares[idx].occupant->color == '0')
+            if (aBoard[idx].occupant->color == 0)
             {
-                switch(squares[idx].occupant->type)
+                switch(aBoard[idx].occupant->type)
                 {
                     case 'R':
+                        orthog_up(white, idx, 0, aBoard);
+                        orthog_down(white, idx, 0, aBoard);
+                        orthog_left(white, idx, 0, aBoard);
+                        orthog_right(white, idx, 0, aBoard);
                         break;
                     case 'N':
+                        knight_jump(white, idx, 0, aBoard);
                         break;
                     case 'B':
+                        diag_down_left(white, idx, 0, aBoard);
+                        diag_down_right(white, idx, 0, aBoard);
+                        diag_up_left(white, idx, 0, aBoard);
+                        diag_up_right(white, idx, 0, aBoard);
                         break;
                     case 'P':
+                        pawn_attack(white, idx, 0, aBoard);
                         break;
                     case 'Q':
+                        orthog_up(white, idx, 0, aBoard);
+                        orthog_down(white, idx, 0, aBoard);
+                        orthog_left(white, idx, 0, aBoard);
+                        orthog_right(white, idx, 0, aBoard);
+                        diag_down_left(white, idx, 0, aBoard);
+                        diag_down_right(white, idx, 0, aBoard);
+                        diag_up_left(white, idx, 0, aBoard);
+                        diag_up_right(white, idx, 0, aBoard);
                         break;
                     case 'K':
+                        king_attack(white, idx, 0, aBoard);
                         break;
                 }
             }
-            else
+            else if (aBoard[idx].occupant->color == 1)
             {
-                switch(squares[idx].occupant->type)
+                switch(aBoard[idx].occupant->type)
                 {
                     case 'R':
+                        orthog_down(black, idx, 1, aBoard);
+                        orthog_left(black, idx, 1, aBoard);
+                        orthog_right(black, idx, 1, aBoard);
+                        orthog_up(black, idx, 1, aBoard);
                         break;
                     case 'N':
+                        knight_jump(black, idx, 1, aBoard);
                         break;
                     case 'B':
+                        diag_up_right(black, idx, 1, aBoard);
+                        diag_up_left(black, idx, 1, aBoard);
+                        diag_down_right(black, idx, 1, aBoard);
+                        diag_down_left(black, idx, 1, aBoard);
                         break;
                     case 'P':
+                        pawn_attack(black, idx, 1, aBoard);
                         break;
                     case 'Q':
+                        orthog_down(black, idx, 1, aBoard);
+                        orthog_left(black, idx, 1, aBoard);
+                        orthog_right(black, idx, 1, aBoard);
+                        orthog_up(black, idx, 1, aBoard);
+                        diag_up_right(black, idx, 1, aBoard);
+                        diag_up_left(black, idx, 1, aBoard);
+                        diag_down_right(black, idx, 1, aBoard);
+                        diag_down_left(black, idx, 1, aBoard);
                         break;
                     case 'K':
+                        king_attack(black, idx, 1, aBoard);
                         break;
                 }
             }
@@ -360,288 +423,343 @@ void board::update_attacked_squares()
     }
 }
 
-void board::orthog_up(std::vector<square> &data, int index, int color)
+void board::orthog_up(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index % 8 == 7) return;
     index++;
     while (index < 64 && index % 8 != 7)
     {   
-        if (squares[index].occupant != NULL) break;
-        data.push_back(squares[index]);
+        if (aBoard[index].occupant != NULL) break;
+        data.push_back(aBoard[index]);
         index++;
     }
     if (index > 63) return;
-    if (squares[index].occupant) 
+    if (aBoard[index].occupant) 
     {
-        if (squares[index].occupant->color == color) return;
+        if (aBoard[index].occupant->color == color) return;
         else 
         {
-            data.push_back(squares[index]);
+            data.push_back(aBoard[index]);
             return;
         }
     }
-    else data.push_back(squares[index]);
+    else data.push_back(aBoard[index]);
 }
 
-void board::orthog_down(std::vector<square> &data, int index, int color)
+void board::orthog_down(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index % 8 == 0) return;
     index--;
     while (index > -1 && index % 8 != 0)
     {
-        if (squares[index].occupant != NULL) break;
-        data.push_back(squares[index]);
+        if (aBoard[index].occupant != NULL) break;
+        data.push_back(aBoard[index]);
         index--;
     }
     if (index < 0) return;
-    if (squares[index].occupant) 
+    if (aBoard[index].occupant) 
     {
-        if (squares[index].occupant->color == color) return;
+        if (aBoard[index].occupant->color == color) return;
         else 
         {
-            data.push_back(squares[index]);
+            data.push_back(aBoard[index]);
             return;
         }
     }
-    else data.push_back(squares[index]);
+    else data.push_back(aBoard[index]);
 }
 
-void board::orthog_left(std::vector<square> &data, int index, int color)
+void board::orthog_left(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index < 8) return;
     index -= 8;
     while (index > 7)
     {
-        if (squares[index].occupant != NULL) break;
-        data.push_back(squares[index]);
+        if (aBoard[index].occupant != NULL) break;
+        data.push_back(aBoard[index]);
         index -= 8;
     }
     if (index < 0) return;
-    if (squares[index].occupant) 
+    if (aBoard[index].occupant) 
     {
-        if (squares[index].occupant->color == color) return;
+        if (aBoard[index].occupant->color == color) return;
         else 
         {
-            data.push_back(squares[index]);
+            data.push_back(aBoard[index]);
             return;
         }
     }
-    else data.push_back(squares[index]);
+    else data.push_back(aBoard[index]);
 }
 
-void board::orthog_right(std::vector<square> &data, int index, int color)
+void board::orthog_right(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index > 55) return;
     index += 8;
     while (index < 56)
     {
-        if (squares[index].occupant != NULL) break;
-        data.push_back(squares[index]);
+        if (aBoard[index].occupant != NULL) break;
+        data.push_back(aBoard[index]);
         index += 8;
     }
     if (index > 63) return;
-    if (squares[index].occupant) 
+    if (aBoard[index].occupant) 
     {
-        if (squares[index].occupant->color == color) return;
+        if (aBoard[index].occupant->color == color) return;
         else 
         {
-            data.push_back(squares[index]);
+            data.push_back(aBoard[index]);
             return;
         }
     }
-    else data.push_back(squares[index]);
+    else data.push_back(aBoard[index]);
 }
 
-void board::diag_up_left(std::vector<square> &data, int index, int color)
+void board::diag_up_left(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index < 8 || index % 8 == 7) return;
     index -= 7;
     while (index > 7 && index % 8 != 7)
     {
-        if (squares[index].occupant != NULL) break;
-        data.push_back(squares[index]);
+        if (aBoard[index].occupant != NULL) break;
+        data.push_back(aBoard[index]);
         index -= 7;
     }
     if (index < 0) return;
-    if (squares[index].occupant) 
+    if (aBoard[index].occupant) 
     {
-        if (squares[index].occupant->color == color) return;
+        if (aBoard[index].occupant->color == color) return;
         else 
         {
-            data.push_back(squares[index]);
+            data.push_back(aBoard[index]);
             return;
         }
     }
-    else data.push_back(squares[index]);
+    else data.push_back(aBoard[index]);
 }
 
-void board::diag_up_right(std::vector<square> &data, int index, int color)
+void board::diag_up_right(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index > 55 || index % 8 == 7) return;
     index += 9;
     while (index < 56 && index % 8 != 7)
     {
-        if (squares[index].occupant != NULL) break;
-        data.push_back(squares[index]);
+        if (aBoard[index].occupant != NULL) break;
+        data.push_back(aBoard[index]);
         index += 9;
     }
     if (index > 63) return;
-    if (squares[index].occupant) 
+    if (aBoard[index].occupant) 
     {
-        if (squares[index].occupant->color == color) return;
+        if (aBoard[index].occupant->color == color) return;
         else 
         {
-            data.push_back(squares[index]);
+            data.push_back(aBoard[index]);
             return;
         }
     }
-    else data.push_back(squares[index]);
+    else data.push_back(aBoard[index]);
 }
 
-void board::diag_down_left(std::vector<square> &data, int index, int color)
+void board::diag_down_left(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index < 8 || index % 8 == 0) return;
     index -= 9;
     while (index > 7 && index % 8 != 0)
     {
-        if (squares[index].occupant != NULL) break;
-        data.push_back(squares[index]);
+        if (aBoard[index].occupant != NULL) break;
+        data.push_back(aBoard[index]);
         index -= 9;
     }
     if (index < 0) return;
-    if (squares[index].occupant) 
+    if (aBoard[index].occupant) 
     {
-        if (squares[index].occupant->color == color) return;
+        if (aBoard[index].occupant->color == color) return;
         else 
         {
-            data.push_back(squares[index]);
+            data.push_back(aBoard[index]);
             return;
         }
     }
-    else data.push_back(squares[index]);
+    else data.push_back(aBoard[index]);
 }
 
-void board::diag_down_right(std::vector<square> &data, int index, int color)
+void board::diag_down_right(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index > 55 || index % 8 == 0) return;
     index += 7;
     while (index < 56 && index % 8 != 0)
     {
-        if (squares[index].occupant != NULL) break;
-        data.push_back(squares[index]);
+        if (aBoard[index].occupant != NULL) break;
+        data.push_back(aBoard[index]);
         index += 7;
     }
     if (index < 0) return;
-    if (squares[index].occupant) 
+    if (aBoard[index].occupant) 
     {
-        if (squares[index].occupant->color == color) return;
+        if (aBoard[index].occupant->color == color) return;
         else 
         {
-            data.push_back(squares[index]);
+            data.push_back(aBoard[index]);
             return;
         }
     }
-    else data.push_back(squares[index]);
+    else data.push_back(aBoard[index]);
 }
 
-void board::knight_jump(std::vector<square> &data, int index, int color)
+void board::knight_jump(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index > 7 && index % 8 != 6 && index % 8 != 7)
     {
-        if (squares[index - 6].occupant == NULL) data.push_back(squares[index - 6]);
-        else if (squares[index - 6].occupant->color != color) data.push_back(squares[index - 6]);
+        if (aBoard[index - 6].occupant == NULL) data.push_back(aBoard[index - 6]);
+        else if (aBoard[index - 6].occupant->color != color) data.push_back(aBoard[index - 6]);
     }
     if (index < 56 && index % 8 != 6 && index % 8 != 7)
     {
-        if (squares[index + 10].occupant == NULL) data.push_back(squares[index + 10]);
-        else if (squares[index + 10].occupant->color != color) data.push_back(squares[index + 10]);
+        if (aBoard[index + 10].occupant == NULL) data.push_back(aBoard[index + 10]);
+        else if (aBoard[index + 10].occupant->color != color) data.push_back(aBoard[index + 10]);
     }
     if (index % 8 != 7 && index > 15)
     {
-        if (squares[index - 15].occupant == NULL)  data.push_back(squares[index - 15]);
-        else if (squares[index- 15].occupant->color != color)  data.push_back(squares[index - 15]);
+        if (aBoard[index - 15].occupant == NULL)  data.push_back(aBoard[index - 15]);
+        else if (aBoard[index- 15].occupant->color != color)  data.push_back(aBoard[index - 15]);
     }
     if (index % 8 != 7 && index < 48)
     {
-        if (squares[index + 17].occupant == NULL) data.push_back(squares[index +17]);
-        else if (squares[index + 17].occupant->color != color) data.push_back(squares[index +17]);
+        if (aBoard[index + 17].occupant == NULL) data.push_back(aBoard[index +17]);
+        else if (aBoard[index + 17].occupant->color != color) data.push_back(aBoard[index +17]);
     }
     if (index % 8 != 0 && index > 15)
     {
-        if (squares[index- 17].occupant == NULL) data.push_back(squares[index - 17]);
-        else if (squares[index - 17].occupant->color != color) data.push_back(squares[index - 17]);
+        if (aBoard[index- 17].occupant == NULL) data.push_back(aBoard[index - 17]);
+        else if (aBoard[index - 17].occupant->color != color) data.push_back(aBoard[index - 17]);
     }
     if (index % 8 != 0 && index < 48)
     {
-        if (squares[index + 15].occupant == NULL) data.push_back(squares[index + 15]);
-        else if (squares[index + 15].occupant->color != color) data.push_back(squares[index + 15]);
+        if (aBoard[index + 15].occupant == NULL) data.push_back(aBoard[index + 15]);
+        else if (aBoard[index + 15].occupant->color != color) data.push_back(aBoard[index + 15]);
     }
     if (index % 8 != 0 && index % 8 != 1 && index > 7)
     {
-        if (squares[index - 10].occupant == NULL) data.push_back(squares[index - 10]);
-        else if (squares[index - 10].occupant->color != color) data.push_back(squares[index - 10]);
+        if (aBoard[index - 10].occupant == NULL) data.push_back(aBoard[index - 10]);
+        else if (aBoard[index - 10].occupant->color != color) data.push_back(aBoard[index - 10]);
     }
     if (index % 8 != 0 && index % 8 != 1 && index < 56)
     {
-        if (squares[index + 6].occupant == NULL) data.push_back(squares[index + 6]);
-        else if (squares[index + 6].occupant->color != color) data.push_back(squares[index + 6]);   
+        if (aBoard[index + 6].occupant == NULL) data.push_back(aBoard[index + 6]);
+        else if (aBoard[index + 6].occupant->color != color) data.push_back(aBoard[index + 6]);   
     }
 }
 
-void board::king_attack(std::vector<square> &data, int index, int color)
+void board::king_attack(std::vector<square> &data, int index, int color, square *aBoard)
 {
     if (index % 8 != 7)
     {
-        if (squares[index + 1].occupant == NULL) data.push_back(squares[index + 1]);
-        else if (squares[index + 1].occupant->color != color) data.push_back(squares[index + 1]);
+        if (aBoard[index + 1].occupant == NULL) data.push_back(aBoard[index + 1]);
+        else if (aBoard[index + 1].occupant->color != color) data.push_back(aBoard[index + 1]);
     }
     if (index > 7)
     {
-        if (squares[index - 8].occupant == NULL) data.push_back(squares[index - 8]);
-        else if (squares[index - 8].occupant->color != color) data.push_back(squares[index - 8]);
+        if (aBoard[index - 8].occupant == NULL) data.push_back(aBoard[index - 8]);
+        else if (aBoard[index - 8].occupant->color != color) data.push_back(aBoard[index - 8]);
     }
     if (index % 8 != 0)
     {
-        if (squares[index - 1].occupant == NULL) data.push_back(squares[index - 1]);
-        else if (squares[index - 1].occupant->color != color) data.push_back(squares[index - 1]);
+        if (aBoard[index - 1].occupant == NULL) data.push_back(aBoard[index - 1]);
+        else if (aBoard[index - 1].occupant->color != color) data.push_back(aBoard[index - 1]);
     }
     if (index < 56)
     {
-        if (squares[index + 8].occupant == NULL) data.push_back(squares[index + 8]);
-        else if (squares[index + 8].occupant->color != color) data.push_back(squares[index + 8]);
+        if (aBoard[index + 8].occupant == NULL) data.push_back(aBoard[index + 8]);
+        else if (aBoard[index + 8].occupant->color != color) data.push_back(aBoard[index + 8]);
     }
     if (index > 7 && index % 8 != 7)
     {
-        if (squares[index - 7].occupant == NULL) data.push_back(squares[index - 7]);
-        else if (squares[index - 7].occupant->color != color) data.push_back(squares[index - 7]);
+        if (aBoard[index - 7].occupant == NULL) data.push_back(aBoard[index - 7]);
+        else if (aBoard[index - 7].occupant->color != color) data.push_back(aBoard[index - 7]);
     }
     if (index < 56 && index % 8 != 7)
     {
-        if (squares[index + 9].occupant == NULL) data.push_back(squares[index + 9]);
-        else if (squares[index + 9].occupant->color != color) data.push_back(squares[index + 9]);
+        if (aBoard[index + 9].occupant == NULL) data.push_back(aBoard[index + 9]);
+        else if (aBoard[index + 9].occupant->color != color) data.push_back(aBoard[index + 9]);
     }
     if (index > 7 && index % 8 != 0)
     {
-        if (squares[index - 9].occupant == NULL) data.push_back(squares[index - 9]);
-        else if (squares[index - 9].occupant->color != color) data.push_back(squares[index - 9]);
+        if (aBoard[index - 9].occupant == NULL) data.push_back(aBoard[index - 9]);
+        else if (aBoard[index - 9].occupant->color != color) data.push_back(aBoard[index - 9]);
     }
     if (index < 56 && index % 8 != 0)
     {
-        if (squares[index + 7].occupant == NULL) data.push_back(squares[index + 7]);
-        else if (squares[index + 7].occupant->color != color) data.push_back(squares[index + 7]);
+        if (aBoard[index + 7].occupant == NULL) data.push_back(aBoard[index + 7]);
+        else if (aBoard[index + 7].occupant->color != color) data.push_back(aBoard[index + 7]);
     }
 }
 
-void board::pawn_attack(std::vector<square> &data, int index, int color)
+void board::pawn_attack(std::vector<square> &data, int index, int color, square *aBoard)
 {
-     if (index > 7 && index % 8 != 7)
+    if (color == 0)
     {
-        if (squares[index - 7].occupant == NULL) data.push_back(squares[index - 7]);
-        else if (squares[index - 7].occupant->color != color) data.push_back(squares[index - 7]);
+        if (index > 7 && index % 8 != 7)
+        {
+            if (aBoard[index - 7].occupant == NULL) data.push_back(aBoard[index - 7]);
+            else if (aBoard[index - 7].occupant->color != color) data.push_back(aBoard[index - 7]);
+        }
+        if (index < 56 && index % 8 != 7)
+        {
+            if (aBoard[index + 9].occupant == NULL) data.push_back(aBoard[index + 9]);
+            else if (aBoard[index + 9].occupant->color != color) data.push_back(aBoard[index + 9]);
+        }
     }
-     if (index < 56 && index % 8 != 7)
+    else if (color == 1)
     {
-        if (squares[index + 9].occupant == NULL) data.push_back(squares[index + 9]);
-        else if (squares[index + 9].occupant->color != color) data.push_back(squares[index + 9]);
+        if (index > 7 && index % 8 != 0)
+        {
+            if (aBoard[index - 9].occupant == NULL) data.push_back(aBoard[index - 9]);
+            else if (aBoard[index - 9].occupant->color != color) data.push_back(aBoard[index - 9]);
+        }
+        if (index < 56 && index % 8 != 0)
+        {
+            if (aBoard[index + 7].occupant == NULL) data.push_back(aBoard[index + 7]);
+            else if (aBoard[index + 7].occupant->color != color) data.push_back(aBoard[index + 7]);
+        }
     }
+}
+
+bool board::check_for_check(int piece_index, int destination)
+{
+    square *copy = copy_board(squares);
+    int color = copy[piece_index].occupant->color;
+    std::vector<square> white;
+    std::vector<square> black;
+    std::string king_square;
+
+    move(copy[piece_index].occupant, &copy[destination]);
+    update_attacked_squares(white, black, copy);
+
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        if (copy[idx].occupant)
+        {
+            if (copy[idx].occupant->color == color && copy[idx].occupant->type == 'K')
+            {
+                king_square = copy[idx].name;
+            }
+        }
+    }
+
+    if (color == 0)
+    {
+        for (long unsigned int idx = 0; idx < black.size(); idx++)
+        {
+            if (black[idx].name == king_square) return true;
+        }
+    }
+    else if (color == 1)
+    {
+        for (long unsigned int idx = 0; idx < white.size(); idx++)
+        {
+            if (white[idx].name == king_square) return true;
+        }
+    }
+    return false;
 }

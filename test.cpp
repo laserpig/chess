@@ -4,14 +4,15 @@
 int main()
 {   
     board game;
-    game.move(game.squares[1].occupant, &game.squares[19]);
-    game.move(game.squares[62].occupant, &game.squares[35]);
-    game.pawn_attack(game.white_attacked_squares, 26, 0);
+    game.move(game.squares[31].occupant, &game.squares[37]);
+    //game.move(game.squares[33].occupant, &game.squares[26]);
+
+   
+    bool check = game.check_for_check(33, 26);
+    if (check == true) std::cout << "CHECK" << std::endl;
+    else if (check == false) std::cout << "SAFE" << std::endl;
+
     
-    for (auto idx = 0; idx < game.white_attacked_squares.size(); idx++)
-    {
-        std::cout << game.white_attacked_squares[idx].name << std::endl;
-    }
-    std::cout << game.white_attacked_squares.size() << std::endl;
+    
     return 0;
 }
