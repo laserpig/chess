@@ -12,4 +12,5 @@ class piece
         square *location;
         char type;
         int move_count = 0;
+        bool en_passant = false;
 };

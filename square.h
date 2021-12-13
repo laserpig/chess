@@ -9,4 +9,5 @@ class square
     public:
     std::string name;
     piece *occupant;
+    int index;
 };

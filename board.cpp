@@ -123,6 +123,7 @@ board::board()
             name = letter + std::to_string(jdx + 1);
             squares[index].name = name;
             squares[index].occupant = NULL;
+            squares[index].index = index;
 
             if (name == "A1")
             {
@@ -309,6 +310,7 @@ square * board::copy_board(square *A1)
     for (auto idx = 0; idx < 64; idx++)
     {
         copy[idx].name = squares[idx].name;
+        copy[idx].index = idx;
         if (A1[idx].occupant)
         {
             new_piece = new piece;
@@ -317,6 +319,7 @@ square * board::copy_board(square *A1)
             new_piece->type = A1[idx].occupant->type;
             new_piece->move_count = A1[idx].occupant->move_count;
             new_piece->location = &copy[idx];
+            new_piece->en_passant = A1[idx].occupant->en_passant;
             copy[idx].occupant = new_piece;
             new_piece = NULL;
         }
@@ -324,8 +327,26 @@ square * board::copy_board(square *A1)
     return copy;
 }
 
-void board::move(piece *aPiece, square *to)
+void board::move(piece *aPiece, square *to, square* aBoard)
 {
+    bool en_passant_capture = false;
+    int en_passant_index = to->index;
+
+    if (aPiece->type == 'P' && aPiece->color == 0 && aPiece->location->index % 8 == 4)
+    {
+        if (en_passant_index != aPiece->location->index + 1 && to->occupant == NULL)
+        {
+            en_passant_capture = true;
+        }
+    }
+    if (aPiece->type == 'P' && aPiece->color == 1 && aPiece->location->index % 8 == 3)
+    {
+        if (en_passant_index != aPiece->location->index - 1 && to->occupant == NULL)
+        {
+            en_passant_capture = true;
+        }
+    }
+
     if (to->occupant)
     {
         delete to->occupant;
@@ -334,6 +355,40 @@ void board::move(piece *aPiece, square *to)
     to->occupant = aPiece;
     aPiece->location = to;
     aPiece->move_count++;
+
+    if (en_passant_capture)
+    {
+        if (aPiece->color == 0)
+        {
+            delete aBoard[en_passant_index - 1].occupant;
+            aBoard[en_passant_index - 1].occupant = NULL;
+        }
+        if (aPiece->color == 1)
+        {
+            delete aBoard[en_passant_index + 1].occupant;
+            aBoard[en_passant_index + 1].occupant = NULL;
+        }
+    }
+
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        if (aBoard[idx].occupant)
+        {
+            aBoard[idx].occupant->en_passant = false;
+        }
+    }
+
+    if (aPiece->type == 'P' && aPiece->move_count == 1)
+    {
+        if (aPiece->color == 0 && en_passant_index % 8 == 3)
+        {
+            aPiece->en_passant = true;
+        }
+        if (aPiece->color == 1 && en_passant_index % 8 == 4)
+        {
+            aPiece->en_passant = true;
+        }
+    }
 }
 
 void board::update_attacked_squares(std::vector<square> &white, std::vector<square> &black, square *aBoard)
@@ -725,6 +780,114 @@ void board::pawn_attack(std::vector<square> &data, int index, int color, square 
     }
 }
 
+bool board::pawn_move(int piece_index, int destination, square* aBoard)
+{
+    if (aBoard[piece_index].occupant->type != 'P') return false;
+    std::vector<square> potential_moves;
+    int color = aBoard[piece_index].occupant->color;
+
+    pawn_attack(potential_moves, piece_index, color, aBoard);
+
+    if (color == 0)
+    {
+        if (piece_index % 8 != 7)
+        {
+            if (aBoard[piece_index + 1].occupant == NULL) potential_moves.push_back(aBoard[piece_index + 1]);
+        }
+        if (aBoard[piece_index].occupant->move_count == 0)
+        {
+            if (aBoard[piece_index + 1].occupant == NULL && aBoard[piece_index + 2].occupant == NULL)
+            {
+                potential_moves.push_back(aBoard[piece_index + 2]);
+            }
+        }
+        if (piece_index % 8 == 4)
+        {
+            if (piece_index > 7)
+            {
+                if (aBoard[piece_index - 8].occupant)
+                {
+                    if (aBoard[piece_index - 8].occupant->type == 'P' && aBoard[piece_index - 8].occupant->move_count == 1
+                    && aBoard[piece_index - 8].occupant->color == 1)
+                    {
+                        if (aBoard[piece_index - 8].occupant->en_passant == true)
+                        {
+                            potential_moves.push_back(aBoard[piece_index - 7]);
+                        }
+                    }
+                }
+            }
+            if (piece_index < 56)
+            {
+                if (aBoard[piece_index + 8].occupant)
+                {
+                    if (aBoard[piece_index + 8].occupant->type == 'P' && aBoard[piece_index + 8].occupant->move_count == 1
+                    && aBoard[piece_index + 8].occupant->color == 1)
+                    {
+                        if (aBoard[piece_index + 8].occupant->en_passant == true)
+                        {
+                            potential_moves.push_back(aBoard[piece_index + 9]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (color == 1)
+    {
+        if (piece_index % 8 != 0)
+        {
+            if (aBoard[piece_index - 1].occupant == NULL) potential_moves.push_back(aBoard[piece_index - 1]);
+        }
+        if (aBoard[piece_index].occupant->move_count == 0)
+        {
+            if (aBoard[piece_index - 1].occupant == NULL && aBoard[piece_index - 2].occupant == NULL)
+            {
+                potential_moves.push_back(aBoard[piece_index - 2]);
+            }
+        }
+        if (piece_index % 8 == 3)
+        {
+            if (piece_index > 7)
+            {
+                if (aBoard[piece_index - 8].occupant)
+                {
+                    if (aBoard[piece_index - 8].occupant->type == 'P' && aBoard[piece_index - 8].occupant->move_count == 1
+                    && aBoard[piece_index - 8].occupant->color == 0)
+                    {
+                        if (aBoard[piece_index - 8].occupant->en_passant == true)
+                        {
+                            potential_moves.push_back(aBoard[piece_index - 9]);
+                        }
+                    }
+                }
+            }
+            if (piece_index < 56)
+            {
+                if (aBoard[piece_index + 8].occupant)
+                {
+                    if (aBoard[piece_index + 8].occupant->type == 'P' && aBoard[piece_index + 8].occupant->move_count == 1
+                    && aBoard[piece_index + 8].occupant->color == 0)
+                    {
+                        if (aBoard[piece_index + 8].occupant->en_passant == true)
+                        {
+                            potential_moves.push_back(aBoard[piece_index + 7]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (long unsigned int idx = 0; idx < potential_moves.size(); idx++)
+    {
+        if (potential_moves[idx].index == destination) return true;
+    }
+
+    return false;
+}
+
 bool board::check_for_check(int piece_index, int destination)
 {
     square *copy = copy_board(squares);
@@ -733,7 +896,7 @@ bool board::check_for_check(int piece_index, int destination)
     std::vector<square> black;
     std::string king_square;
 
-    move(copy[piece_index].occupant, &copy[destination]);
+    move(copy[piece_index].occupant, &copy[destination], copy);
     update_attacked_squares(white, black, copy);
 
     for (auto idx = 0; idx < 64; idx++)
