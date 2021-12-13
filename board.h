@@ -20,6 +20,7 @@ class board
         bool is_move_legal(piece candidate, square to);
         bool check_for_check(int piece_index, int destination);
         bool pawn_move(int piece_index, int destination, square *aBoard);
+        bool king_move(int piece_index, int destination, square *aBoard);
         void update_attacked_squares(std::vector<square> &white, std::vector<square> &black, square *aBoard);
         void diag_up_left(std::vector<square> &data, int index, int color, square *aBoard);
         void diag_up_right(std::vector<square> &data, int index, int color, square *aBoard);

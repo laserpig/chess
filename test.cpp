@@ -4,9 +4,10 @@
 int main()
 {   
     board game;
-    game.move(game.squares[25].occupant, &game.squares[28], game.squares);
-    game.move(game.squares[22].occupant, &game.squares[20], game.squares);
-    game.move(game.squares[28].occupant, &game.squares[21], game.squares);
+    game.move(game.squares[40].occupant, &game.squares[2], game.squares);
+    game.move(game.squares[48].occupant, &game.squares[3], game.squares);
+    game.move(game.squares[32].occupant, &game.squares[48], game.squares);
+    
 
     for (auto idx = 0; idx < 64; idx++)
     {
