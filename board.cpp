@@ -1035,6 +1035,80 @@ bool board::king_move(int piece_index, int destination, square *aBoard)
     return false;
 }
 
+bool board::queen_move(int piece_index, int destination, square *aBoard)
+{
+    int color = aBoard[piece_index].occupant->color;
+    std::vector<square> potential_moves;
+
+    orthog_down(potential_moves, piece_index, color, aBoard);
+    orthog_up(potential_moves, piece_index, color, aBoard);
+    orthog_left(potential_moves, piece_index, color, aBoard);
+    orthog_right(potential_moves, piece_index, color, aBoard);
+
+    diag_down_left(potential_moves, piece_index, color, aBoard);
+    diag_down_right(potential_moves, piece_index, color, aBoard);
+    diag_up_left(potential_moves, piece_index, color, aBoard);
+    diag_up_right(potential_moves, piece_index, color, aBoard);
+
+    for (unsigned long int idx = 0; idx < potential_moves.size(); idx++)
+    {
+        if (potential_moves[idx].index == destination) return true;
+    }
+
+    return false;
+}
+
+bool board::rook_move(int piece_index, int destination, square *aBoard)
+{
+    int color = aBoard[piece_index].occupant->color;
+    std::vector<square> potential_moves;
+
+    orthog_down(potential_moves, piece_index, color, aBoard);
+    orthog_up(potential_moves, piece_index, color, aBoard);
+    orthog_right(potential_moves, piece_index, color, aBoard);
+    orthog_left(potential_moves, piece_index, color, aBoard);
+
+    for (unsigned long int idx = 0; idx < potential_moves.size(); idx++)
+    {
+        if (potential_moves[idx].index == destination) return true;
+    }
+
+    return false;
+}
+
+bool board::knight_move(int piece_index, int destination, square *aBoard)
+{
+    int color = aBoard[piece_index].occupant->color;
+    std::vector<square> potential_moves;
+
+    knight_jump(potential_moves, piece_index, color, aBoard);
+
+    for (unsigned long int idx = 0; idx < potential_moves.size(); idx++)
+    {
+        if (potential_moves[idx].index == destination) return true;
+    }
+
+    return false;
+}
+
+bool board::bishop_move(int piece_index, int destination, square *aBoard)
+{
+    int color = aBoard[piece_index].occupant->color;
+    std::vector<square> potential_moves;
+
+    diag_down_left(potential_moves, piece_index, color, aBoard);
+    diag_down_right(potential_moves, piece_index, color, aBoard);
+    diag_up_right(potential_moves, piece_index, color, aBoard);
+    diag_up_left(potential_moves, piece_index, color, aBoard);
+
+    for (unsigned long int idx = 0; idx < potential_moves.size(); idx++)
+    {
+        if (potential_moves[idx].index == destination) return true;
+    }
+
+    return false;
+}
+
 bool board::check_for_check(int piece_index, int destination)
 {
     square *copy = copy_board(squares);
