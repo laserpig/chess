@@ -4,7 +4,7 @@
 
 board::board()
 {
-    squares = new square[64];
+    squares = new square[65];
     std::string name;
     char letter = '@';
     int index = 0;
@@ -289,6 +289,7 @@ board::board()
             index++;
         }
     }
+    squares[64].whose_turn = 0;
 }
 
 board::~board()
@@ -305,7 +306,7 @@ board::~board()
 
 square * board::copy_board(square *A1)
 {
-    square *copy = new square[64];
+    square *copy = new square[65];
     piece *new_piece = NULL;
     for (auto idx = 0; idx < 64; idx++)
     {
@@ -324,6 +325,12 @@ square * board::copy_board(square *A1)
             new_piece = NULL;
         }
     }
+    copy[64].whose_turn = A1[64].whose_turn;
+    copy[64].white_castled = A1[64].white_castled;
+    copy[64].black_castled = A1[64].black_castled;
+    copy[64].white_in_check = A1[64].white_in_check;
+    copy[64].black_in_check = A1[64].black_in_check;
+    copy[64].checkmate = A1[64].checkmate;
     return copy;
 }
 
@@ -381,6 +388,7 @@ void board::move(piece *aPiece, square *to, square* aBoard)
                 aBoard[0].occupant->location = &aBoard[24];
                 aBoard[0].occupant = NULL;
             }
+            aBoard[64].white_castled = true;
         }
         if (aPiece->color == 1)
         {
@@ -396,6 +404,7 @@ void board::move(piece *aPiece, square *to, square* aBoard)
                 aBoard[7].occupant->location = &aBoard[31];
                 aBoard[7].occupant = NULL;
             }
+            aBoard[64].black_castled = true;
         }
     }
 
@@ -432,6 +441,9 @@ void board::move(piece *aPiece, square *to, square* aBoard)
             aPiece->en_passant = true;
         }
     }
+
+    if (aBoard[64].whose_turn == 0) aBoard[64].whose_turn = 1;
+    if (aBoard[64].whose_turn == 1) aBoard[64].whose_turn = 0;
 }
 
 void board::update_attacked_squares(std::vector<square> &white, std::vector<square> &black, square *aBoard)
@@ -1109,9 +1121,9 @@ bool board::bishop_move(int piece_index, int destination, square *aBoard)
     return false;
 }
 
-bool board::check_for_check(int piece_index, int destination)
+bool board::check_for_check(int piece_index, int destination, square *aBoard)
 {
-    square *copy = copy_board(squares);
+    square *copy = copy_board(aBoard);
     int color = copy[piece_index].occupant->color;
     std::vector<square> white;
     std::vector<square> black;
@@ -1146,4 +1158,40 @@ bool board::check_for_check(int piece_index, int destination)
         }
     }
     return false;
+}
+
+bool board::is_move_legal(int piece_index, int destination, square *aBoard)
+{
+    if (aBoard[piece_index].occupant == NULL) return false;
+    if (aBoard[piece_index].occupant->color != aBoard[64].whose_turn) return false;
+
+    switch(aBoard[piece_index].occupant->type)
+    {
+        case 'R':
+            if (!rook_move(piece_index, destination, aBoard)) return false;
+            break;
+        case 'N':
+            if (!knight_move(piece_index, destination, aBoard)) return false;;
+            break;
+        case 'B':
+            if (!bishop_move(piece_index, destination, aBoard)) return false;
+            break;
+        case 'P':
+            if (!pawn_move(piece_index, destination, aBoard)) return false;
+            break;
+        case 'Q':
+            if (!queen_move(piece_index, destination, aBoard)) return false;
+            break;
+        case 'K':
+            if (!king_move(piece_index, destination, aBoard)) return false;
+            break;
+    }
+    if (!check_for_check(piece_index, destination, aBoard)) return false;
+
+    return true;
+}
+
+void board::turn(square *aBoard)
+{
+    
 }

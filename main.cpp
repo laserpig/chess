@@ -4,16 +4,27 @@
 int main()
 {
     board game;
-    game.move(game.squares[17].occupant, &game.squares[19]);
-    for (auto idx = 0; idx < 64; idx++)
-    {
-        std::cout << game.squares[idx].name << " : ";
-        if (game.squares[idx].occupant)
-        {
-            std::cout << game.squares[idx].occupant->type << ", " << game.squares[idx].occupant->move_count;
-        }
+    
+    std::string reply;
+    std::string to;
+    std::string from;
 
-        std::cout << std::endl;
+    while (reply != "q" && reply != "Q")
+    {
+        if (game.squares[64].whose_turn == 0)
+        {
+            std::cout << "Enter White Move: ";
+            getline(std::cin, from);
+            getline(std::cin,to);
+        }
+        if (game.squares[64].whose_turn == 1)
+        {
+            std::cout << "Enter Black Move: ";
+            getline(std::cin, from);
+            getline(std::cin,to);
+        }
+        
     }
+
     return 0;
 }

@@ -10,4 +10,10 @@ class square
     std::string name;
     piece *occupant;
     int index;
+    int whose_turn;
+    bool white_in_check = false;
+    bool black_in_check = false;
+    bool white_castled = false;
+    bool black_castled = false;
+    bool checkmate = false;
 };

@@ -16,9 +16,10 @@ class board
         bool white_king_in_check;
         bool black_king_in_check;
         square * copy_board(square *A1);
+        void turn(square *aBoard);
         void move(piece *aPiece, square *to, square* aBoard);
-        bool is_move_legal(piece candidate, square to);
-        bool check_for_check(int piece_index, int destination);
+        bool is_move_legal(int piece_index, int destination, square *aBoard);
+        bool check_for_check(int piece_index, int destination, square *aBoard);
         bool pawn_move(int piece_index, int destination, square *aBoard);
         bool king_move(int piece_index, int destination, square *aBoard);
         bool queen_move(int piece_index, int destination, square *aBoard);
