@@ -294,7 +294,7 @@ board::board()
 
 board::~board()
 {
-    for (auto idx = 0; idx < 64; idx++)
+    for (auto idx = 0; idx < 65; idx++)
     {
         if (squares[idx].occupant)
         {
@@ -324,6 +324,7 @@ square * board::copy_board(square *A1)
             copy[idx].occupant = new_piece;
             new_piece = NULL;
         }
+        else copy[idx].occupant = NULL;
     }
     copy[64].whose_turn = A1[64].whose_turn;
     copy[64].white_castled = A1[64].white_castled;
@@ -442,8 +443,17 @@ void board::move(piece *aPiece, square *to, square* aBoard)
         }
     }
 
-    if (aBoard[64].whose_turn == 0) aBoard[64].whose_turn = 1;
-    if (aBoard[64].whose_turn == 1) aBoard[64].whose_turn = 0;
+    if (aBoard[64].whose_turn == 0)
+    {
+        aBoard[64].whose_turn = 1;
+        return;
+    }
+    if (aBoard[64].whose_turn == 1) 
+    {
+        aBoard[64].whose_turn = 0;
+        return;
+    }
+
 }
 
 void board::update_attacked_squares(std::vector<square> &white, std::vector<square> &black, square *aBoard)
@@ -1147,16 +1157,37 @@ bool board::check_for_check(int piece_index, int destination, square *aBoard)
     {
         for (long unsigned int idx = 0; idx < black.size(); idx++)
         {
-            if (black[idx].name == king_square) return true;
+            if (black[idx].name == king_square)
+            {
+                for (auto idx = 0; idx < 65; idx++)
+                {
+                    if (copy[idx].occupant) delete copy[idx].occupant;
+                }
+                delete[] copy;
+                return true;
+            }
         }
     }
     else if (color == 1)
     {
         for (long unsigned int idx = 0; idx < white.size(); idx++)
         {
-            if (white[idx].name == king_square) return true;
+            if (white[idx].name == king_square)
+            {
+                for (auto idx = 0; idx < 65; idx++)
+                {
+                    if (copy[idx].occupant) delete copy[idx].occupant;
+                }
+                delete[] copy;
+                return true;
+            }
         }
     }
+    for (auto idx = 0; idx < 65; idx++)
+    {
+        if (copy[idx].occupant) delete copy[idx].occupant;
+    }
+    delete[] copy;
     return false;
 }
 
@@ -1186,12 +1217,329 @@ bool board::is_move_legal(int piece_index, int destination, square *aBoard)
             if (!king_move(piece_index, destination, aBoard)) return false;
             break;
     }
-    if (!check_for_check(piece_index, destination, aBoard)) return false;
+    if (check_for_check(piece_index, destination, aBoard)) return false;
 
     return true;
 }
 
-void board::turn(square *aBoard)
+int board::turn(square *aBoard, std::string new_move)
 {
-    
+    std::string from;
+    std::string to;
+    int from_index;
+    int to_index;
+
+    if (new_move.size() < 5) return 1;
+
+    from += new_move[0];
+    from += new_move[1];
+
+    to += new_move[3];
+    to += new_move[4];
+
+    bool to_found = false;
+    bool from_found = false;
+
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        if (to == aBoard[idx].name)
+        {
+            to_found = true;
+            to_index = idx;
+        }
+        if (from == aBoard[idx].name) 
+        {
+            from_found = true;
+            from_index = idx;
+        }
+    }
+
+    if (!to_found || !from_found) return 1;
+    if (aBoard[from_index].occupant == NULL) return 1;
+    if (aBoard[from_index].occupant->color != aBoard[64].whose_turn) return 1;
+    if (aBoard[to_index].occupant)
+    {
+        if (aBoard[to_index].occupant->color == aBoard[64].whose_turn) return 1;
+    }
+    if (!is_move_legal(from_index, to_index, aBoard)) return 1;
+
+    move(aBoard[from_index].occupant, &aBoard[to_index], aBoard);
+
+    update_attacked_squares(white_attacked_squares, black_attacked_squares, aBoard);
+    int king_square;
+    bool check = false;
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        if (aBoard[idx].occupant)
+        {
+            if (aBoard[idx].occupant->color != aBoard[to_index].occupant->color)
+            {
+                if (aBoard[idx].occupant->type == 'K') king_square = idx;
+            }
+        }
+    }
+    if (aBoard[to_index].occupant->color == 0)
+    {
+        for (unsigned long int idx = 0; idx < white_attacked_squares.size(); idx++)
+        {
+            if (white_attacked_squares[idx].index == king_square) check = true;
+        }
+    }
+
+    if (aBoard[to_index].occupant->color == 1)
+    {
+        for (unsigned long int idx = 0; idx < black_attacked_squares.size(); idx++)
+        {
+            if (black_attacked_squares[idx].index == king_square) check = true;
+        }
+    }
+
+    if (check)
+    {
+        if (aBoard[to_index].occupant->color == 0)
+        {
+            if (check_for_mate(aBoard, 1)) return 3;
+        }
+
+        if (aBoard[to_index].occupant->color == 1)
+        {
+            if (check_for_mate(aBoard, 0)) return 3;
+        }
+        
+        return 2;
+    }
+
+    return 0;
+}
+
+bool board::check_for_mate(square *aBoard, int color)
+{
+    std::vector<square> potential_moves;
+
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        if (aBoard[idx].occupant)
+        {
+            if (aBoard[idx].occupant->color == color)
+            {
+                switch(aBoard[idx].occupant->type)
+                {
+                    case 'R':
+                        rook(potential_moves, idx, aBoard);
+                        for (unsigned long int jdx = 0; jdx < potential_moves.size(); jdx++)
+                        {
+                            if (!check_for_check(idx, potential_moves[jdx].index, aBoard))
+                            {
+                                return false;
+                            }
+                        }
+                        potential_moves.clear();
+                        break;
+                    case 'N':
+                        knight_jump(potential_moves, idx, color, aBoard);
+                        for (unsigned long int jdx = 0; jdx < potential_moves.size(); jdx++)
+                        {
+                            if (!check_for_check(idx, potential_moves[jdx].index, aBoard))
+                            {
+                                return false;
+                            }
+                        }
+                        potential_moves.clear();
+                        break;
+                    case 'B':
+                        bishop(potential_moves, idx, aBoard);
+                        for (unsigned long int jdx = 0; jdx < potential_moves.size(); jdx++)
+                        {
+                            if (!check_for_check(idx, potential_moves[jdx].index, aBoard))
+                            {
+                                return false;
+                            }
+                        }
+                        potential_moves.clear();
+                        break;
+                    case 'P':
+                        pawn(potential_moves, idx, aBoard);
+                        for (unsigned long int jdx = 0; jdx < potential_moves.size(); jdx++)
+                        {
+                            if (!check_for_check(idx, potential_moves[jdx].index, aBoard))
+                            {
+                                return false;
+                            }
+                        }
+                        potential_moves.clear();
+                        break;
+                    case 'Q':
+                        queen(potential_moves, idx, aBoard);
+                        for (unsigned long int jdx = 0; jdx < potential_moves.size(); jdx++)
+                        {
+                            if (!check_for_check(idx, potential_moves[jdx].index, aBoard))
+                            {
+                                return false;
+                            }
+                        }
+                        potential_moves.clear();
+                        break;
+                    case 'K':
+                        king_attack(potential_moves, idx, aBoard[idx].occupant->color, aBoard);  
+                        for (unsigned long int jdx = 0; jdx < potential_moves.size(); jdx++)
+                        {
+                            if (!check_for_check(idx, potential_moves[jdx].index, aBoard))
+                            {
+                                return false;
+                            }
+                        }
+                        potential_moves.clear();                     
+                        break;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+void board::pawn(std::vector<square> &data, int index, square *aBoard)
+{
+    int color = aBoard[index].occupant->color;
+    pawn_attack(data, index, color, aBoard);
+
+    if (color == 0)
+    {
+        if (index % 8 != 7)
+        {
+            if (aBoard[index + 1].occupant == NULL) data.push_back(aBoard[index + 1]);
+        }
+        if (aBoard[index].occupant->move_count == 0)
+        {
+            if (aBoard[index + 1].occupant == NULL && aBoard[index + 2].occupant == NULL)
+            {
+                data.push_back(aBoard[index + 2]);
+            }
+        }
+        if (index % 8 == 4)
+        {
+            if (index > 7)
+            {
+                if (aBoard[index - 8].occupant)
+                {
+                    if (aBoard[index - 8].occupant->type == 'P' && aBoard[index - 8].occupant->move_count == 1
+                    && aBoard[index - 8].occupant->color == 1)
+                    {
+                        if (aBoard[index - 8].occupant->en_passant == true)
+                        {
+                            data.push_back(aBoard[index - 7]);
+                        }
+                    }
+                }
+            }
+            if (index < 56)
+            {
+                if (aBoard[index + 8].occupant)
+                {
+                    if (aBoard[index + 8].occupant->type == 'P' && aBoard[index + 8].occupant->move_count == 1
+                    && aBoard[index + 8].occupant->color == 1)
+                    {
+                        if (aBoard[index + 8].occupant->en_passant == true)
+                        {
+                            data.push_back(aBoard[index + 9]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (color == 1)
+    {
+        if (index % 8 != 0)
+        {
+            if (aBoard[index - 1].occupant == NULL) data.push_back(aBoard[index - 1]);
+        }
+        if (aBoard[index].occupant->move_count == 0)
+        {
+            if (aBoard[index - 1].occupant == NULL && aBoard[index - 2].occupant == NULL)
+            {
+                data.push_back(aBoard[index - 2]);
+            }
+        }
+        if (index % 8 == 3)
+        {
+            if (index > 7)
+            {
+                if (aBoard[index - 8].occupant)
+                {
+                    if (aBoard[index - 8].occupant->type == 'P' && aBoard[index - 8].occupant->move_count == 1
+                    && aBoard[index - 8].occupant->color == 0)
+                    {
+                        if (aBoard[index - 8].occupant->en_passant == true)
+                        {
+                            data.push_back(aBoard[index - 9]);
+                        }
+                    }
+                }
+            }
+            if (index < 56)
+            {
+                if (aBoard[index + 8].occupant)
+                {
+                    if (aBoard[index + 8].occupant->type == 'P' && aBoard[index + 8].occupant->move_count == 1
+                    && aBoard[index + 8].occupant->color == 0)
+                    {
+                        if (aBoard[index + 8].occupant->en_passant == true)
+                        {
+                            data.push_back(aBoard[index + 7]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void board::queen(std::vector<square> &data, int index, square *aBoard)
+{
+    int color = aBoard[index].occupant->color;
+
+    orthog_up(data, index, color, aBoard);
+    orthog_down(data, index, color, aBoard);
+    orthog_left(data, index, color, aBoard);
+    orthog_right(data, index, color, aBoard);
+    diag_down_left(data, index, color, aBoard);
+    diag_down_right(data, index, color, aBoard);
+    diag_up_left(data, index, color, aBoard);
+    diag_up_right(data, index, color, aBoard);
+}
+
+void board::rook(std::vector<square> &data, int index, square *aBoard)
+{
+    int color = aBoard[index].occupant->color;
+
+    orthog_up(data, index, color, aBoard);
+    orthog_down(data, index, color, aBoard);
+    orthog_left(data, index, color, aBoard);
+    orthog_right(data, index, color, aBoard);
+}
+
+void board::bishop(std::vector<square> &data, int index, square *aBoard)
+{
+    int color = aBoard[index].occupant->color;
+
+    diag_down_left(data, index, color, aBoard);
+    diag_down_right(data, index, color, aBoard);
+    diag_up_left(data, index, color, aBoard);
+    diag_up_right(data, index, color, aBoard);
+}
+
+void board::printBoard()
+{
+    for (auto idx = 0; idx < 64; idx++)
+    {
+        std::cout << squares[idx].name << " : ";
+        if (squares[idx].occupant)
+        {
+            if (squares[idx].occupant->color == 0) std::cout << "White ";
+            if (squares[idx].occupant->color == 1) std::cout << "Black ";
+            std::cout << squares[idx].occupant->type;
+        }
+        std::cout << std::endl;
+    }
 }
