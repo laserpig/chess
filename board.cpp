@@ -130,166 +130,168 @@ board::board()
                 squares[index].occupant = white_rook1;
                 white_rook1->location = &squares[index];
             }
-            if (name == "H1")
+            else if (name == "H1")
             {
                 squares[index].occupant = white_rook2;
                 white_rook2->location = &squares[index];
             }
-            if (name == "B1")
+            else if (name == "B1")
             {
                 squares[index].occupant = white_knight1;
                 white_knight1->location = &squares[index];
             }
-            if (name == "G1")
+            else if (name == "G1")
             {
                 squares[index].occupant = white_knight2;
                 white_knight2->location = &squares[index];
             }
-            if (name == "C1")
+            else if (name == "C1")
             {
                 squares[index].occupant = white_bishop1;
                 white_bishop1->location = &squares[index];
             }
-            if (name == "F1")
+            else if (name == "F1")
             {
                 squares[index].occupant = white_bishop2;
                 white_bishop2->location = &squares[index];
             }
-            if (name == "D1")
+            else if (name == "D1")
             {
                 squares[index].occupant = white_queen;
                 white_queen->location = &squares[index];
             }
-            if (name == "E1")
+            else if (name == "E1")
             {
                 squares[index].occupant = white_king;
                 white_king->location = &squares[index];
             }
-            if (name == "A2")
+            else if (name == "A2")
             {
                 squares[index].occupant = white_pawn1;
                 white_pawn1->location = &squares[index];
             }
-            if (name == "B2")
+            else if (name == "B2")
             {
                 squares[index].occupant = white_pawn2;
                 white_pawn2->location = &squares[index];
             }
-            if (name == "C2")
+            else if (name == "C2")
             {
                 squares[index].occupant = white_pawn3;
                 white_pawn3->location = &squares[index];
             }
-            if (name == "D2")
+            else if (name == "D2")
             {
                 squares[index].occupant = white_pawn4;
                 white_pawn4->location = &squares[index];
             }
-            if (name == "E2")
+            else if (name == "E2")
             {
                 squares[index].occupant = white_pawn5;
                 white_pawn5->location = &squares[index];
             }
-            if (name == "F2")
+            else if (name == "F2")
             {
                 squares[index].occupant = white_pawn6;
                 white_pawn6->location = &squares[index];
             }
-            if (name == "G2")
+            else if (name == "G2")
             {
                 squares[index].occupant = white_pawn7;
                 white_pawn7->location = &squares[index];
             }
-            if (name == "H2")
+            else if (name == "H2")
             {
                 squares[index].occupant = white_pawn8;
                 white_pawn8->location = &squares[index];
             }
 
-            if (name == "A7")
+            else if (name == "A7")
             {
                 squares[index].occupant = black_pawn1;
                 black_pawn1->location = &squares[index];
             }
-            if (name == "B7")
+            else if (name == "B7")
             {
                 squares[index].occupant = black_pawn2;
                 black_pawn2->location = &squares[index];
             }
-            if (name == "C7")
+            else if (name == "C7")
             {
                 squares[index].occupant = black_pawn3;
                 black_pawn3->location = &squares[index];
             }
-            if (name == "D7")
+            else if (name == "D7")
             {
                 squares[index].occupant = black_pawn4;
                 black_pawn4->location = &squares[index];
             }
-            if (name == "E7")
+            else if (name == "E7")
             {
                 squares[index].occupant = black_pawn5;
                 black_pawn5->location = &squares[index];
             }
-            if (name == "F7")
+            else if (name == "F7")
             {
                 squares[index].occupant = black_pawn6;
-                black_pawn7->location = &squares[index];
+                black_pawn6->location = &squares[index];
             }
-            if (name == "G7")
+            else if (name == "G7")
             {
                 squares[index].occupant = black_pawn7;
                 black_pawn7->location = &squares[index];
             }
-            if (name == "H7")
+            else if (name == "H7")
             {
                 squares[index].occupant = black_pawn8;
                 black_pawn8->location = &squares[index];
             }
-            if (name == "A8")
+            else if (name == "A8")
             {
                 squares[index].occupant = black_rook1;
                 black_rook1->location = &squares[index];
             }
-            if (name == "H8")
+            else if (name == "H8")
             {
                 squares[index].occupant = black_rook2;
                 black_rook2->location = &squares[index];
             }
-            if (name == "B8")
+            else if (name == "B8")
             {
                 squares[index].occupant = black_knight1;
                 black_knight1->location = &squares[index];
             }
-            if (name == "G8")
+            else if (name == "G8")
             {
                 squares[index].occupant = black_knight2;
                 black_knight2->location = &squares[index];
             }
-            if (name == "C8")
+            else if (name == "C8")
             {
                 squares[index].occupant = black_bishop1;
                 black_bishop1->location = &squares[index];
             }
-            if (name == "F8")
+            else if (name == "F8")
             {
                 squares[index].occupant = black_bishop2;
                 black_bishop2->location = &squares[index];
             }
-            if (name == "D8")
+            else if (name == "D8")
             {
                 squares[index].occupant = black_queen;
                 black_queen->location = &squares[index];
             }
-            if (name == "E8")
+            else if (name == "E8")
             {
                 squares[index].occupant = black_king;
                 black_king->location = &squares[index];
             }
+            else squares[index].occupant = NULL;
             index++;
         }
     }
     squares[64].whose_turn = 0;
+    squares[64].occupant = NULL;
 }
 
 board::~board()
@@ -306,7 +308,8 @@ board::~board()
 
 square * board::copy_board(square *A1)
 {
-    square *copy = new square[65];
+    square *copy = NULL;
+    copy = new square[65];
     piece *new_piece = NULL;
     for (auto idx = 0; idx < 64; idx++)
     {
@@ -341,6 +344,7 @@ void board::move(piece *aPiece, square *to, square* aBoard)
     bool castle = false;
     int en_passant_index = to->index;
 
+
     if (aPiece->type == 'P' && aPiece->color == 0 && aPiece->location->index % 8 == 4)
     {
         if (en_passant_index != aPiece->location->index + 1 && to->occupant == NULL)
@@ -348,6 +352,7 @@ void board::move(piece *aPiece, square *to, square* aBoard)
             en_passant_capture = true;
         }
     }
+
     if (aPiece->type == 'P' && aPiece->color == 1 && aPiece->location->index % 8 == 3)
     {
         if (en_passant_index != aPiece->location->index - 1 && to->occupant == NULL)
@@ -851,7 +856,32 @@ bool board::pawn_move(int piece_index, int destination, square* aBoard)
     std::vector<square> potential_moves;
     int color = aBoard[piece_index].occupant->color;
 
-    pawn_attack(potential_moves, piece_index, color, aBoard);
+    if (color == 0)
+    {
+        if (piece_index > 7 && piece_index % 8 != 7)
+        {
+            if (aBoard[piece_index - 7].occupant)
+                if (aBoard[piece_index - 7].occupant->color != color) potential_moves.push_back(aBoard[piece_index - 7]);
+        }
+        if (piece_index < 56 && piece_index % 8 != 7)
+        {
+            if (aBoard[piece_index + 9].occupant)
+                if (aBoard[piece_index + 9].occupant->color != color) potential_moves.push_back(aBoard[piece_index + 9]);
+        }
+    }
+    else if (color == 1)
+    {
+        if (piece_index > 7 && piece_index % 8 != 0)
+        {
+            if (aBoard[piece_index - 9].occupant)
+                if (aBoard[piece_index - 9].occupant->color != color) potential_moves.push_back(aBoard[piece_index - 9]);
+        }
+        if (piece_index < 56 && piece_index % 8 != 0)
+        {
+            if (aBoard[piece_index + 7].occupant)
+                if (aBoard[piece_index + 7].occupant->color != color) potential_moves.push_back(aBoard[piece_index + 7]);
+        }
+    }
 
     if (color == 0)
     {
@@ -1159,9 +1189,10 @@ bool board::check_for_check(int piece_index, int destination, square *aBoard)
         {
             if (black[idx].name == king_square)
             {
-                for (auto idx = 0; idx < 65; idx++)
+                for (auto idx = 0; idx < 64; idx++)
                 {
                     if (copy[idx].occupant) delete copy[idx].occupant;
+
                 }
                 delete[] copy;
                 return true;
@@ -1174,7 +1205,7 @@ bool board::check_for_check(int piece_index, int destination, square *aBoard)
         {
             if (white[idx].name == king_square)
             {
-                for (auto idx = 0; idx < 65; idx++)
+                for (auto idx = 0; idx < 64; idx++)
                 {
                     if (copy[idx].occupant) delete copy[idx].occupant;
                 }
@@ -1183,7 +1214,8 @@ bool board::check_for_check(int piece_index, int destination, square *aBoard)
             }
         }
     }
-    for (auto idx = 0; idx < 65; idx++)
+    
+    for (auto idx = 0; idx < 64; idx++)
     {
         if (copy[idx].occupant) delete copy[idx].occupant;
     }
@@ -1400,7 +1432,34 @@ bool board::check_for_mate(square *aBoard, int color)
 void board::pawn(std::vector<square> &data, int index, square *aBoard)
 {
     int color = aBoard[index].occupant->color;
-    pawn_attack(data, index, color, aBoard);
+    
+    if (color == 0)
+    {
+        if (index > 7 && index % 8 != 7)
+        {
+            if (aBoard[index - 7].occupant)
+                if (aBoard[index - 7].occupant->color != color) data.push_back(aBoard[index - 7]);
+        }
+        if (index < 56 && index % 8 != 7)
+        {
+            if (aBoard[index + 9].occupant)
+                if (aBoard[index + 9].occupant->color != color) data.push_back(aBoard[index + 9]);
+        }
+    }
+    else if (color == 1)
+    {
+        if (index > 7 && index % 8 != 0)
+        {
+            if (aBoard[index - 9].occupant)
+                if (aBoard[index - 9].occupant->color != color) data.push_back(aBoard[index - 9]);
+        }
+        if (index < 56 && index % 8 != 0)
+        {
+            if (aBoard[index + 7].occupant)
+                if (aBoard[index + 7].occupant->color != color) data.push_back(aBoard[index + 7]);
+        }
+    }
+
 
     if (color == 0)
     {

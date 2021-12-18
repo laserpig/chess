@@ -10,7 +10,7 @@ class board
     public:
         board();
         ~board();
-        square *squares;
+        square *squares = NULL;
         std::vector<square> white_attacked_squares;
         std::vector<square> black_attacked_squares;
         bool white_king_in_check;
