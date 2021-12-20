@@ -12,108 +12,140 @@ board::board()
     piece *white_pawn1 = new piece;
     white_pawn1->color = 0;
     white_pawn1->type = 'P';
+    white_pawn1->value = 1;
     piece *white_pawn2 = new piece;
     white_pawn2->color = 0;
     white_pawn2->type = 'P';
+    white_pawn2->value = 1;
     piece *white_pawn3 = new piece;
     white_pawn3->color = 0;
     white_pawn3->type = 'P';
+    white_pawn3->value = 1;
     piece *white_pawn4 = new piece;
     white_pawn4->color = 0;
     white_pawn4->type = 'P';
+    white_pawn4->value = 1;
     piece *white_pawn5 = new piece;
     white_pawn5->color = 0;
     white_pawn5->type = 'P';
+    white_pawn5-> value = 1;
     piece *white_pawn6 = new piece;
     white_pawn6->color = 0;
     white_pawn6->type = 'P';
+    white_pawn6->value = 1;
     piece *white_pawn7 = new piece;
     white_pawn7->color = 0;
     white_pawn7->type = 'P';
+    white_pawn7->value = 1;
     piece *white_pawn8 = new piece;
     white_pawn8->color = 0;
     white_pawn8->type = 'P';
+    white_pawn8->value = 1;
 
     piece *black_pawn1 = new piece;
     black_pawn1->color = 1;
     black_pawn1->type = 'P';
+    black_pawn1->value = -1;
     piece *black_pawn2 = new piece;
     black_pawn2->color = 1;
     black_pawn2->type = 'P';
+    black_pawn2->value = -1;
     piece *black_pawn3 = new piece;
     black_pawn3->color = 1;
     black_pawn3->type = 'P';
+    black_pawn3->value = -1;
     piece *black_pawn4 = new piece;
     black_pawn4->color = 1;
     black_pawn4->type = 'P';
+    black_pawn4-> value = -1;
     piece *black_pawn5 = new piece;
     black_pawn5->color = 1;
     black_pawn5->type = 'P';
+    black_pawn5->value = -1;
     piece *black_pawn6 = new piece;
     black_pawn6->color = 1;
     black_pawn6->type = 'P';
+    black_pawn6->value = -1;
     piece *black_pawn7 = new piece;
     black_pawn7->color = 1;
     black_pawn7->type = 'P';
+    black_pawn7->value = -1;
     piece *black_pawn8 = new piece;
     black_pawn8->color = 1;
     black_pawn8->type = 'P';
+    black_pawn8->value = -1;
 
     piece *white_rook1 = new piece;
     white_rook1->color = 0;
     white_rook1->type = 'R';
+    white_rook1->value = 5;
     piece *white_rook2 = new piece;
     white_rook2->color = 0;
     white_rook2->type = 'R';
+    white_rook2->value = 5;
 
     piece *black_rook1 = new piece;
     black_rook1->color = 1;
     black_rook1->type = 'R';
+    black_rook1->value = -5;
     piece *black_rook2 = new piece;
     black_rook2->color = 1;
     black_rook2->type = 'R';
+    black_rook2->value = -5;
 
     piece *white_knight1 = new piece;
     white_knight1->color = 0;
     white_knight1->type = 'N';
+    white_knight1->value = 3;
     piece *white_knight2 = new piece;
     white_knight2->color = 0;
     white_knight2->type = 'N';
+    white_knight2->value = 3;
 
     piece *black_knight1 = new piece;
     black_knight1->color = 1;
     black_knight1->type = 'N';
+    black_knight1->value = -3;
     piece *black_knight2 = new piece;
     black_knight2->color = 1;
     black_knight2->type = 'N';
+    black_knight2->value = -3;
 
     piece *white_bishop1 = new piece;
     white_bishop1->color = 0;
     white_bishop1->type = 'B';
+    white_bishop1->value = 3;
     piece *white_bishop2 = new piece;
     white_bishop2->color = 0;
     white_bishop2->type = 'B';
+    white_bishop2->value = 3;
 
     piece *black_bishop1 = new piece;
     black_bishop1->color = 1;
     black_bishop1->type = 'B';
+    black_bishop1->value = -3;
     piece *black_bishop2 = new piece;
     black_bishop2->color = 1;
     black_bishop2->type = 'B';
+    black_bishop2->value = -3;
 
     piece *white_king = new piece;
     white_king->color = 0;
     white_king->type = 'K';
+    white_king->value = 1000;
     piece *white_queen = new piece;
     white_queen->color = 0;
     white_queen->type = 'Q';
+    white_queen->value = 9;
 
     piece *black_king = new piece;
     black_king->color = 1;
     black_king->type = 'K';
+    black_king->value = -1000;
     piece *black_queen = new piece;
     black_queen->color = 1;
     black_queen->type = 'Q';
+    black_queen->value = -9;
 
     for (auto idx = 0; idx < 8; idx++)
     {
@@ -342,8 +374,12 @@ void board::move(piece *aPiece, square *to, square* aBoard)
 {
     bool en_passant_capture = false;
     bool castle = false;
+    bool promotion = false;
+    char promotion_type;
     int en_passant_index = to->index;
 
+    if (aPiece->type == 'P' && aPiece->color == 0 && to->index % 8 == 7) promotion = true;
+    if (aPiece->type == 'P' && aPiece->color == 1 && to->index % 8 == 0) promotion = true;
 
     if (aPiece->type == 'P' && aPiece->color == 0 && aPiece->location->index % 8 == 4)
     {
@@ -377,6 +413,26 @@ void board::move(piece *aPiece, square *to, square* aBoard)
     to->occupant = aPiece;
     aPiece->location = to;
     aPiece->move_count++;
+
+    if (promotion)
+    {
+        promotion_type = promote();
+        aPiece->type = promotion_type;
+        if (aPiece->color == 0)
+        {
+            if (aPiece->type == 'Q') aPiece->value = 9;
+            if (aPiece->type == 'R') aPiece->value = 5;
+            if (aPiece->type == 'B') aPiece->value = 3;
+            if (aPiece->type == 'N') aPiece->value = 3;
+        }
+        if (aPiece->color == 1)
+        {
+            if (aPiece->type == 'Q') aPiece->value = -9;
+            if (aPiece->type == 'R') aPiece->value = -5;
+            if (aPiece->type == 'B') aPiece->value = -3;
+            if (aPiece->type == 'N') aPiece->value = -3;
+        }
+    }
 
     if (castle)
     {
@@ -1340,6 +1396,18 @@ int board::turn(square *aBoard, std::string new_move)
         
         return 2;
     }
+    else if (!check)
+    {
+        if (aBoard[to_index].occupant->color == 0)
+        {
+            if (check_for_mate(aBoard, 1)) return 4;
+        }
+
+        if (aBoard[to_index].occupant->color == 1)
+        {
+            if (check_for_mate(aBoard, 0)) return 4;
+        }
+    }
 
     return 0;
 }
@@ -1586,6 +1654,25 @@ void board::bishop(std::vector<square> &data, int index, square *aBoard)
     diag_down_right(data, index, color, aBoard);
     diag_up_left(data, index, color, aBoard);
     diag_up_right(data, index, color, aBoard);
+}
+
+char board::promote()
+{
+    char type;
+    std::string response;
+    std::cout << "Please enter promotion piece e.g. 'Q', 'R', 'B', 'N', : ";
+    getline(std::cin, response);
+    while (true)
+    {
+        while (response.size() !=  1)
+        {
+            std::cout << "Please enter promotion piece e.g. 'Q', 'R', 'B', 'N', : ";
+            getline(std::cin, response);
+        }
+        type = response[0];
+        if (type == 113 || type == 114 || type == 98 || type == 110) type -= 32;
+        if (type == 'Q' || type == 'R' || type == 'B' || type == 'N') return type;
+    }
 }
 
 void board::printBoard()

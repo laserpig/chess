@@ -43,5 +43,6 @@ class board
         void rook(std::vector<square> &data, int index, square *aBoard);
         void bishop(std::vector<square> &data, int index, square *aBoard);
         void pawn(std::vector<square> &data, int index, square *aBoard);
+        char promote();
         void printBoard();
 };

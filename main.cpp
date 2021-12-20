@@ -26,6 +26,7 @@ int main()
             if (game.squares[64].whose_turn == 1) std::cout << "White Wins!" << std::endl;
             if (game.squares[64].whose_turn == 0) std::cout << "Black Wins!" << std::endl;
         }
+        if (status == 4) std::cout << "Draw by Stalemate!" << std::endl;
     }
 
 
