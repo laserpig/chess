@@ -6,6 +6,9 @@
 
 class computer
 {
-public:
-    float evaluation;
+    public:
+        int color;
+        float evaluation;
+        int depth;
+        void evaluate(square *aBoard);
 };
