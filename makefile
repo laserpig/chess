@@ -8,4 +8,4 @@ board.o: board.h pieces.h square.h board.cpp
 	g++ board.cpp -g -Wall -std=c++11 -c board.cpp
 
 clean:
-	rm *.o clean
+	rm *.o main test

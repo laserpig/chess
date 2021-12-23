@@ -4,13 +4,9 @@
 int main()
 {   
     board game;
-    std::string move;
-    std::cout << "Enter move :";
-    getline(std::cin, move);
-    int status;
+    std::string fen = game.generate_fen(game.squares);
 
-    status = game.turn(game.squares, move);
-    std::cout << status << std::endl;
+    std::cout << fen << std::endl;
 
     return 0;
 }

@@ -3,6 +3,7 @@
 #include "pieces.h"
 #include "square.h"
 #include "board.h"
+#include "move.h"
 
 class computer
 {
@@ -10,5 +11,6 @@ class computer
         int color;
         float evaluation;
         int depth;
-        void evaluate(square *aBoard);
+        move evaluate(square *aBoard);
+        std::vector<std::vector<move>> tree;
 };

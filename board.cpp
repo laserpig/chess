@@ -367,6 +367,8 @@ square * board::copy_board(square *A1)
     copy[64].white_in_check = A1[64].white_in_check;
     copy[64].black_in_check = A1[64].black_in_check;
     copy[64].checkmate = A1[64].checkmate;
+    copy[64].half_move = A1[64].half_move;
+    copy[64].full_move = A1[64].full_move;
     return copy;
 }
 
@@ -377,9 +379,12 @@ void board::move(piece *aPiece, square *to, square* aBoard)
     bool promotion = false;
     char promotion_type;
     int en_passant_index = to->index;
+    bool half_move = false;
 
     if (aPiece->type == 'P' && aPiece->color == 0 && to->index % 8 == 7) promotion = true;
     if (aPiece->type == 'P' && aPiece->color == 1 && to->index % 8 == 0) promotion = true;
+
+    if (aPiece->type == 'P') half_move = true;
 
     if (aPiece->type == 'P' && aPiece->color == 0 && aPiece->location->index % 8 == 4)
     {
@@ -408,6 +413,7 @@ void board::move(piece *aPiece, square *to, square* aBoard)
     if (to->occupant)
     {
         delete to->occupant;
+        half_move = true;
     } 
     aPiece->location->occupant = NULL;
     to->occupant = aPiece;
@@ -503,6 +509,9 @@ void board::move(piece *aPiece, square *to, square* aBoard)
             aPiece->en_passant = true;
         }
     }
+
+    if (aPiece->color == 1) aBoard[64].full_move++;
+    if (half_move) aBoard[64].half_move++;
 
     if (aBoard[64].whose_turn == 0)
     {
@@ -1673,6 +1682,127 @@ char board::promote()
         if (type == 113 || type == 114 || type == 98 || type == 110) type -= 32;
         if (type == 'Q' || type == 'R' || type == 'B' || type == 'N') return type;
     }
+}
+
+std::string board::generate_fen(square *aBoard)
+{
+    std::string fen;
+    char buffer[10000];
+    int index = 7;
+    bool empty_squares = false;
+    int empty_square_count = 0;
+    bool white_short = false;
+    bool white_long = false;
+    bool black_short = false;
+    bool black_long = false;
+    bool en_passant = false;
+    int en_passant_index;
+
+    while (index != 56)
+    {
+        if (aBoard[index].occupant)
+        {
+            if (empty_squares)
+            {
+                fen += itoa(empty_square_count, buffer, 10);
+                empty_square_count = 0;
+                empty_squares = false;
+            }
+            if (aBoard[index].occupant->color == 0)
+            {
+                fen += aBoard[index].occupant->type;
+            }
+            if (aBoard[index].occupant->color == 1)
+            {
+                fen += aBoard[index].occupant->type + 32;
+            }
+            if (aBoard[index].occupant->en_passant == true)
+            {
+                en_passant = true;
+                en_passant_index = index;
+            }
+        }
+        else 
+        {
+            empty_square_count++;
+            empty_squares = true;
+        }
+        if (index < 56) index += 8;
+        else 
+        {
+            if (empty_squares)
+            {
+                fen += itoa(empty_square_count, buffer, 10);
+                empty_square_count = 0;
+                empty_squares = false;
+            }
+            fen += '/';
+            index -= 57;
+        }
+    }
+
+    if (aBoard[56].occupant)
+    {
+        fen += aBoard[56].occupant->type;
+    }
+
+    if (aBoard[65].whose_turn == 0) fen += " w";
+    if (aBoard[65].whose_turn == 1) fen += " b";
+
+    if (aBoard[39].occupant)
+    {
+        if (aBoard[63].occupant)
+        {
+            if (aBoard[39].occupant->move_count == 0 && 
+            aBoard[63].occupant->move_count == 0) black_short = true;
+        }
+        if (aBoard[7].occupant)
+        {
+            if (aBoard[39].occupant->move_count == 0 && 
+            aBoard[7].occupant->move_count == 0) black_long = true;
+        }
+    }
+    if (aBoard[32].occupant)
+    {
+        if (aBoard[56].occupant)
+        {
+            if (aBoard[32].occupant->move_count == 0 && 
+            aBoard[56].occupant->move_count == 0) white_short = true;
+        }
+        if (aBoard[0].occupant)
+        {
+            if (aBoard[0].occupant->move_count == 0 && 
+            aBoard[32].occupant->move_count == 0) white_long = true;
+        }
+    }
+    fen += " ";
+    if (white_short) fen += "K";
+    if (white_long) fen += "Q";
+    if (!white_short && ! white_long) fen += "-";
+    if (black_short) fen += "k";
+    if (black_long) fen += "q";
+    if (!black_short && !black_long) fen += "-";
+
+    fen += " ";
+    if (en_passant)
+    {
+        if (aBoard[en_passant_index].occupant->color == 0)
+        {
+            fen += aBoard[en_passant_index - 1].name;
+        }
+        if (aBoard[en_passant_index].occupant->color == 1)
+        {
+            fen += aBoard[en_passant_index + 1].name;
+        }
+    }
+    else if (!en_passant) fen += "-";
+
+    fen += " ";
+    fen += itoa(aBoard[64].half_move, buffer, 10);
+    fen += " ";
+    fen += itoa(aBoard[64].full_move, buffer, 10);
+
+    return fen;
 }
 
 void board::printBoard()

@@ -16,4 +16,6 @@ class square
     bool white_castled = false;
     bool black_castled = false;
     bool checkmate = false;
+    int half_move = 0;
+    int full_move = 1;
 };

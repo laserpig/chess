@@ -45,4 +45,5 @@ class board
         void pawn(std::vector<square> &data, int index, square *aBoard);
         char promote();
         void printBoard();
+        std::string generate_fen(square *aBoard);
 };
