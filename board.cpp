@@ -511,7 +511,8 @@ void board::move(piece *aPiece, square *to, square* aBoard)
     }
 
     if (aPiece->color == 1) aBoard[64].full_move++;
-    if (half_move) aBoard[64].half_move++;
+    if (half_move) aBoard[64].half_move = 0;
+    if (!half_move) aBoard[64].half_move++;
 
     if (aBoard[64].whose_turn == 0)
     {
@@ -1327,6 +1328,11 @@ int board::turn(square *aBoard, std::string new_move)
     int to_index;
 
     if (new_move.size() < 5) return 1;
+    if (new_move == "Draw" || new_move == "draw" || new_move == "DRAW")
+    {
+        if (aBoard[64].half_move > 49) return 5;
+        return 1;
+    }
 
     from += new_move[0];
     from += new_move[1];
@@ -1788,11 +1794,13 @@ std::string board::generate_fen(square *aBoard)
     {
         if (aBoard[en_passant_index].occupant->color == 0)
         {
-            fen += aBoard[en_passant_index - 1].name;
+            fen += aBoard[en_passant_index - 1].name[0] + 32;
+            fen += aBoard[en_passant_index - 1].name[1];
         }
         if (aBoard[en_passant_index].occupant->color == 1)
         {
-            fen += aBoard[en_passant_index + 1].name;
+            fen += aBoard[en_passant_index + 1].name[0] + 32;
+            fen += aBoard[en_passant_index + 1].name[1];
         }
     }
     else if (!en_passant) fen += "-";
@@ -1803,6 +1811,194 @@ std::string board::generate_fen(square *aBoard)
     fen += itoa(aBoard[64].full_move, buffer, 10);
 
     return fen;
+}
+
+square * board::board_gen(std::string fen)
+{ 
+    square *aBoard = new square[65];
+    int index = 0;
+    char letter = '@';
+    std::string name;
+    int fen_index = 0;
+    piece *new_piece;
+
+    for (auto idx = 0; idx < 8; idx++)
+    {
+        letter++;
+        for (auto jdx = 0; jdx < 8; jdx++)
+        {
+            name = letter + std::to_string(jdx + 1);
+            aBoard[index].name = name;
+            aBoard[index].occupant = NULL;
+            aBoard[index].index = index;
+            index++;
+        }
+    }
+
+    index = 7;
+
+    while (index != 56)
+    {
+        if (fen[fen_index] == '/')
+        {
+            index -= 57;
+            fen_index++;
+            continue;
+        }
+        if (fen[fen_index] > 48 && fen[fen_index] < 58) 
+        {
+            index += 8 * atoi(&fen[fen_index]);
+            fen_index++;
+            continue;
+        }
+        if (fen[fen_index] > 64 && fen[fen_index] < 91)
+        {
+            new_piece = new piece;
+            aBoard[index].occupant = new_piece;
+            new_piece->location = &aBoard[index];
+            new_piece->color = 0;
+            new_piece->type = fen[fen_index];
+            new_piece->en_passant = false;
+            new_piece->move_count = 0;
+            switch (fen[fen_index])
+            {
+                case 'R':
+                    new_piece->value = 5;
+                    break;
+                case 'N':
+                    new_piece->value = 3;
+                    break;
+                case 'B':
+                    new_piece->value = 3;
+                    break;
+                case 'K':
+                    new_piece->value = 1000;
+                    break;
+                case 'Q':
+                    new_piece->value = 9;
+                    break;
+                case 'P':
+                    new_piece->value = 1;
+                    break;
+            }
+            fen_index++;
+            index += 8;
+            continue;
+        }
+        if (fen[fen_index] > 96 && fen[fen_index] < 123)
+        {
+            new_piece = new piece;
+            aBoard[index].occupant = new_piece;
+            new_piece->location = &aBoard[index];
+            new_piece->color = 1;
+            new_piece->type = fen[fen_index] - 32;
+            new_piece->en_passant = false;
+            new_piece->move_count = 0;
+            switch (fen[fen_index])
+            {
+                case 'r':
+                    new_piece->value = -5;
+                    break;
+                case 'n':
+                    new_piece->value = -3;
+                    break;
+                case 'b':
+                    new_piece->value = -3;
+                    break;
+                case 'k':
+                    new_piece->value = -1000;
+                    break;
+                case 'q':
+                    new_piece->value = -9;
+                    break;
+                case 'p':
+                    new_piece->value = -1;
+                    break;
+            }
+            fen_index++;
+            index += 8;
+            continue;
+        }
+    }
+
+    if (fen[fen_index] == 32) fen_index++;
+    else if (fen[fen_index] > 64 && fen[fen_index] < 91)
+    {
+        new_piece = new piece;
+        aBoard[index].occupant = new_piece;
+        new_piece->location = &aBoard[index];
+        new_piece->color = 0;
+        new_piece->type = fen[fen_index];
+        new_piece->en_passant = false;
+        new_piece->move_count = 0;
+        switch (fen[fen_index])
+        {
+            case 'R':
+                new_piece->value = 5;
+                break;
+            case 'N':
+                new_piece->value = 3;
+                break;
+            case 'B':
+                new_piece->value = 3;
+                break;
+            case 'K':
+                new_piece->value = 1000;
+                break;
+            case 'Q':
+                new_piece->value = 9;
+                break;
+            case 'P':
+                new_piece->value = 1;
+                break;
+        }
+        fen_index += 2;
+    }
+    else if (fen[fen_index] > 96 && fen[fen_index] < 123)
+    {
+        new_piece = new piece;
+        aBoard[index].occupant = new_piece;
+        new_piece->location = &aBoard[index];
+        new_piece->color = 1;
+        new_piece->type = fen[fen_index] - 32;
+        new_piece->en_passant = false;
+        new_piece->move_count = 0;
+        switch (fen[fen_index])
+        {
+            case 'r':
+                new_piece->value = -5;
+                break;
+            case 'n':
+                new_piece->value = -3;
+                break;
+            case 'b':
+                new_piece->value = -3;
+                break;
+            case 'k':
+                new_piece->value = -1000;
+                break;
+            case 'q':
+                new_piece->value = -9;
+                break;
+            case 'p':
+                new_piece->value = -1;
+                break;
+        }
+        fen_index += 2;
+    }
+
+    if (fen[fen_index] == 'w')
+    {
+        aBoard[64].whose_turn = 0;
+        fen_index += 2;
+    }
+    if (fen[fen_index] == 'b') 
+    {
+        aBoard[64].whose_turn = 1;
+        fen_index += 2;
+    }
+
+    return aBoard;
 }
 
 void board::printBoard()

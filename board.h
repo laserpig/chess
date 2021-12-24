@@ -46,4 +46,5 @@ class board
         char promote();
         void printBoard();
         std::string generate_fen(square *aBoard);
+        square * board_gen(std::string fen);
 };
