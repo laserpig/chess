@@ -364,6 +364,10 @@ square * board::copy_board(square *A1)
     copy[64].whose_turn = A1[64].whose_turn;
     copy[64].white_castled = A1[64].white_castled;
     copy[64].black_castled = A1[64].black_castled;
+    copy[64].white_long = A1[64].white_long;
+    copy[64].white_short = A1[64].white_short;
+    copy[64].black_long = A1[64].black_long;
+    copy[64].black_short = A1[64].black_short;
     copy[64].white_in_check = A1[64].white_in_check;
     copy[64].black_in_check = A1[64].black_in_check;
     copy[64].checkmate = A1[64].checkmate;
@@ -449,12 +453,14 @@ void board::move(piece *aPiece, square *to, square* aBoard)
                 aBoard[40].occupant = aBoard[56].occupant;
                 aBoard[56].occupant->location = &aBoard[40];
                 aBoard[56].occupant = NULL;
+                aBoard[64].white_short = true;
             }
             if (aPiece->location->index == 16)
             {
                 aBoard[24].occupant = aBoard[0].occupant;
                 aBoard[0].occupant->location = &aBoard[24];
                 aBoard[0].occupant = NULL;
+                aBoard[64].white_long = true;
             }
             aBoard[64].white_castled = true;
         }
@@ -465,12 +471,14 @@ void board::move(piece *aPiece, square *to, square* aBoard)
                 aBoard[47].occupant = aBoard[63].occupant;
                 aBoard[63].occupant->location = &aBoard[47];
                 aBoard[63].occupant = NULL;
+                aBoard[64].black_short = true;
             }
             if (aPiece->location->index == 23)
             {
                 aBoard[31].occupant = aBoard[7].occupant;
                 aBoard[7].occupant->location = &aBoard[31];
                 aBoard[7].occupant = NULL;
+                aBoard[64].black_long = true;
             }
             aBoard[64].black_castled = true;
         }
@@ -1141,10 +1149,10 @@ bool board::king_move(int piece_index, int destination, square *aBoard)
         }
     }
 
-    if (color == 0 && white_short) potential_moves.push_back(aBoard[48]);
-    if (color == 0 && white_long) potential_moves.push_back(aBoard[16]);
-    if (color == 1 && black_short) potential_moves.push_back(aBoard[55]);
-    if (color == 1 && black_long) potential_moves.push_back(aBoard[23]);
+    if (color == 0 && white_short && !aBoard[64].white_short) potential_moves.push_back(aBoard[48]);
+    if (color == 0 && white_long && !aBoard[64].white_long) potential_moves.push_back(aBoard[16]);
+    if (color == 1 && black_short && !aBoard[64].black_short) potential_moves.push_back(aBoard[55]);
+    if (color == 1 && black_long && !aBoard[64].black_long) potential_moves.push_back(aBoard[23]);
 
     for (unsigned long int idx = 0; idx < potential_moves.size(); idx++)
     {
@@ -1841,18 +1849,22 @@ square * board::board_gen(std::string fen)
     {
         if (fen[fen_index] == '/')
         {
+            std::cout << "line break " << index << std::endl;
             index -= 57;
             fen_index++;
             continue;
         }
         if (fen[fen_index] > 48 && fen[fen_index] < 58) 
         {
-            index += 8 * atoi(&fen[fen_index]);
+            std::cout << "skip " << index << " length: " << (8 * atoi(&fen[fen_index])) << std::endl;
+            if (index + (8 * atoi(&fen[fen_index])) > 63) index += (8 * (atoi(&fen[fen_index]) - 1));
+            else if (index < 56) index += (8 * (atoi(&fen[fen_index])));
             fen_index++;
             continue;
         }
         if (fen[fen_index] > 64 && fen[fen_index] < 91)
         {
+            std::cout << "white " << index << std::endl;
             new_piece = new piece;
             aBoard[index].occupant = new_piece;
             new_piece->location = &aBoard[index];
@@ -1882,11 +1894,12 @@ square * board::board_gen(std::string fen)
                     break;
             }
             fen_index++;
-            index += 8;
+            if (index < 56) index += 8;
             continue;
         }
         if (fen[fen_index] > 96 && fen[fen_index] < 123)
         {
+            std::cout << "black " << index << std::endl;
             new_piece = new piece;
             aBoard[index].occupant = new_piece;
             new_piece->location = &aBoard[index];
@@ -1916,7 +1929,7 @@ square * board::board_gen(std::string fen)
                     break;
             }
             fen_index++;
-            index += 8;
+            if (index < 56) index += 8;
             continue;
         }
     }
@@ -1998,19 +2011,88 @@ square * board::board_gen(std::string fen)
         fen_index += 2;
     }
 
+    aBoard[64].white_short = true;
+    aBoard[64].white_long = true;
+    aBoard[64].black_short = true;
+    aBoard[64].black_short = true;
+
+    name = "";
+    while (fen[fen_index] != 32)
+    {
+        name += fen[fen_index];
+        fen_index++;
+    }
+
+    if (name == "-") fen_index++;
+    else 
+    {
+        for (unsigned long int idx = 0; idx < name.length(); idx++)
+        {
+            if (name[idx] == 'K') aBoard[64].white_short = false;
+            if (name[idx] == 'Q') aBoard[64].white_long = false;
+            if (name[idx] == 'k') aBoard[64].black_short = false;
+            if (name[idx] == 'q') aBoard[64].black_long = false;
+        }
+        fen_index++;
+    }
+
+    if (fen[fen_index] == '-') fen_index += 2;
+    else 
+    {
+        name = "";
+        name += fen[fen_index];
+        fen_index++;
+        name += fen[fen_index];
+        name[0] -= 32;
+
+        for (auto idx = 0; idx < 64; idx++)
+        {
+            if (aBoard[idx].name == name)
+            {
+                if (idx % 8 == 2)
+                {
+                    aBoard[idx + 1].occupant->en_passant = true;
+                }
+                if (idx % 8 == 5)
+                {
+                    aBoard[idx - 1].occupant->en_passant = true;
+                }
+            }
+        }
+        fen_index += 2;
+    }
+
+    name = "";
+    while (fen[fen_index] != 32)
+    {
+        name += fen[fen_index];
+        fen_index++;
+    }
+    int num = atoi(&name[0]);
+    aBoard[64].half_move = num;
+    fen_index++;
+    name = "";
+    while (fen[fen_index])
+    {
+        name += fen[fen_index];
+        fen_index++;
+    }
+    num = atoi(&name[0]);
+    aBoard[64].full_move = num;
+
     return aBoard;
 }
 
-void board::printBoard()
+void board::printBoard(square *aBoard)
 {
     for (auto idx = 0; idx < 64; idx++)
     {
-        std::cout << squares[idx].name << " : ";
-        if (squares[idx].occupant)
+        std::cout << aBoard[idx].name << " : ";
+        if (aBoard[idx].occupant)
         {
-            if (squares[idx].occupant->color == 0) std::cout << "White ";
-            if (squares[idx].occupant->color == 1) std::cout << "Black ";
-            std::cout << squares[idx].occupant->type;
+            if (aBoard[idx].occupant->color == 0) std::cout << "White ";
+            if (aBoard[idx].occupant->color == 1) std::cout << "Black ";
+            std::cout << aBoard[idx].occupant->type;
         }
         std::cout << std::endl;
     }

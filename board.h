@@ -44,7 +44,7 @@ class board
         void bishop(std::vector<square> &data, int index, square *aBoard);
         void pawn(std::vector<square> &data, int index, square *aBoard);
         char promote();
-        void printBoard();
+        void printBoard(square *aBoard);
         std::string generate_fen(square *aBoard);
         square * board_gen(std::string fen);
 };
