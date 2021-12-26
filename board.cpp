@@ -1741,6 +1741,7 @@ std::string board::generate_fen(square *aBoard)
             empty_square_count++;
             empty_squares = true;
         }
+
         if (index < 56) index += 8;
         else 
         {
@@ -1757,11 +1758,23 @@ std::string board::generate_fen(square *aBoard)
 
     if (aBoard[56].occupant)
     {
+        if (empty_squares) fen += itoa(empty_square_count, buffer, 10);
         fen += aBoard[56].occupant->type;
     }
+    else
+    {
+        empty_square_count++;
+        fen += itoa(empty_square_count, buffer, 10);
+    }
 
-    if (aBoard[65].whose_turn == 0) fen += " w";
-    if (aBoard[65].whose_turn == 1) fen += " b";
+    if (aBoard[64].whose_turn == 0)
+    {
+        fen += " w";
+    }
+    if (aBoard[64].whose_turn == 1)
+    { 
+        fen += " b";
+    }
 
     if (aBoard[39].occupant)
     {
@@ -1792,10 +1805,9 @@ std::string board::generate_fen(square *aBoard)
     fen += " ";
     if (white_short) fen += "K";
     if (white_long) fen += "Q";
-    if (!white_short && ! white_long) fen += "-";
     if (black_short) fen += "k";
     if (black_long) fen += "q";
-    if (!black_short && !black_long) fen += "-";
+    if (!white_short && !white_long && !black_short && !black_long) fen += "-";
 
     fen += " ";
     if (en_passant)
@@ -1848,15 +1860,12 @@ square * board::board_gen(std::string fen)
     while (index != 56)
     {
         if (fen[fen_index] == '/')
-        {
-            std::cout << "line break " << index << std::endl;
-            index -= 57;
+        {            index -= 57;
             fen_index++;
             continue;
         }
         if (fen[fen_index] > 48 && fen[fen_index] < 58) 
         {
-            std::cout << "skip " << index << " length: " << (8 * atoi(&fen[fen_index])) << std::endl;
             if (index + (8 * atoi(&fen[fen_index])) > 63) index += (8 * (atoi(&fen[fen_index]) - 1));
             else if (index < 56) index += (8 * (atoi(&fen[fen_index])));
             fen_index++;
@@ -1864,7 +1873,6 @@ square * board::board_gen(std::string fen)
         }
         if (fen[fen_index] > 64 && fen[fen_index] < 91)
         {
-            std::cout << "white " << index << std::endl;
             new_piece = new piece;
             aBoard[index].occupant = new_piece;
             new_piece->location = &aBoard[index];
@@ -1899,7 +1907,6 @@ square * board::board_gen(std::string fen)
         }
         if (fen[fen_index] > 96 && fen[fen_index] < 123)
         {
-            std::cout << "black " << index << std::endl;
             new_piece = new piece;
             aBoard[index].occupant = new_piece;
             new_piece->location = &aBoard[index];

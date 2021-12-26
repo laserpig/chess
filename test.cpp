@@ -9,9 +9,9 @@ int main()
     getline(std::cin, fen);
 
     square *aBoard = game.board_gen(fen);
-    game.printBoard(aBoard);
     fen = game.generate_fen(aBoard);
-    std::cout << fen << std::endl;
+    std::cout << "Enter fen: " << fen << std::endl;
+    game.printBoard(aBoard);
 
     return 0;
 }
