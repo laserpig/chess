@@ -8,9 +8,10 @@
 class computer
 {
     public:
+        board game;
         int color;
-        float evaluation;
-        int depth;
-        move evaluate(square *aBoard);
-        std::vector<std::vector<move>> tree;
+        int start_depth = 4;
+        move tree(std::string fen);
+        int tree(std::string fen, int depth, move aMove);
+        int eval(square *aBoard);
 };

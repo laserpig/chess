@@ -1,17 +1,19 @@
 #include "board.h"
+#include "computer.h"
 #include <iostream>
 
 int main()
 {   
     board game;
+    computer ai;
     std::string fen;
+    move aMove;
+
     std::cout << "Enter fen: ";
     getline(std::cin, fen);
+    aMove = ai.tree(fen);
 
-    square *aBoard = game.board_gen(fen);
-    fen = game.generate_fen(aBoard);
-    std::cout << "Enter fen: " << fen << std::endl;
-    game.printBoard(aBoard);
+    std::cout << game.squares[aMove.from].name << " " << game.squares[aMove.to].name << std::endl;
 
     return 0;
 }

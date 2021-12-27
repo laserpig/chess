@@ -1253,6 +1253,7 @@ bool board::check_for_check(int piece_index, int destination, square *aBoard)
             if (copy[idx].occupant->color == color && copy[idx].occupant->type == 'K')
             {
                 king_square = copy[idx].name;
+                break;
             }
         }
     }
@@ -1265,7 +1266,10 @@ bool board::check_for_check(int piece_index, int destination, square *aBoard)
             {
                 for (auto idx = 0; idx < 64; idx++)
                 {
-                    if (copy[idx].occupant) delete copy[idx].occupant;
+                    if (copy[idx].occupant) 
+                    {
+                        delete copy[idx].occupant;
+                    }
 
                 }
                 delete[] copy;
@@ -1281,7 +1285,10 @@ bool board::check_for_check(int piece_index, int destination, square *aBoard)
             {
                 for (auto idx = 0; idx < 64; idx++)
                 {
-                    if (copy[idx].occupant) delete copy[idx].occupant;
+                    if (copy[idx].occupant)
+                    {
+                        delete copy[idx].occupant;
+                    }
                 }
                 delete[] copy;
                 return true;
@@ -1385,7 +1392,11 @@ int board::turn(square *aBoard, std::string new_move)
         {
             if (aBoard[idx].occupant->color != aBoard[to_index].occupant->color)
             {
-                if (aBoard[idx].occupant->type == 'K') king_square = idx;
+                if (aBoard[idx].occupant->type == 'K') 
+                {
+                    king_square = idx;
+                    break;
+                }
             }
         }
     }
@@ -1393,7 +1404,11 @@ int board::turn(square *aBoard, std::string new_move)
     {
         for (unsigned long int idx = 0; idx < white_attacked_squares.size(); idx++)
         {
-            if (white_attacked_squares[idx].index == king_square) check = true;
+            if (white_attacked_squares[idx].index == king_square) 
+            {
+                check = true;
+                break;
+            }
         }
     }
 
@@ -1401,7 +1416,11 @@ int board::turn(square *aBoard, std::string new_move)
     {
         for (unsigned long int idx = 0; idx < black_attacked_squares.size(); idx++)
         {
-            if (black_attacked_squares[idx].index == king_square) check = true;
+            if (black_attacked_squares[idx].index == king_square) 
+            {
+                check = true;
+                break;
+            }
         }
     }
 
